@@ -26,6 +26,10 @@ class Main extends Application implements NativeKeyListener {
 			console.setVisible(true)
 			GlobalScreen.registerNativeHook()
 			GlobalScreen.addNativeKeyListener(this)
+
+			primaryStage.onCloseRequest = [
+				System.exit(0)
+			]
 		}
 		catch (Exception e) {
 			e.printStackTrace()
