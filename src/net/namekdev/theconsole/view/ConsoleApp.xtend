@@ -13,10 +13,16 @@ import org.jnativehook.GlobalScreen
 import org.jnativehook.NativeInputEvent
 import org.jnativehook.keyboard.NativeKeyEvent
 import org.jnativehook.keyboard.NativeKeyListener
+import net.namekdev.theconsole.scripts.execution.JsUtilsProvider
+import net.namekdev.theconsole.utils.base.IDatabase
+import net.namekdev.theconsole.utils.Database
+import net.namekdev.theconsole.utils.PathUtils
 
 class ConsoleApp implements NativeKeyListener {
 	JFrame hostWindow
 	ConsoleWindow consoleWindow
+	IDatabase database
+	JsUtilsProvider jsUtils
 	IScriptManager scriptManager
 	IAliasManager aliasManager
 
@@ -26,7 +32,9 @@ class ConsoleApp implements NativeKeyListener {
 		hostWindow = new UndecoratedUtilityWindow(new Scene(consoleWindow))
 		hostWindow.opacity = 0.85f
 
-		scriptManager = new JsScriptManager
+		database = new Database(PathUtils.appSettingsDir + "/settings.db")
+		jsUtils = new JsUtilsProvider(null /* TODO */)
+		scriptManager = new JsScriptManager(jsUtils, database)
 		aliasManager = new AliasManager
 		val consolePrompt = consoleWindow.consolePromptInput
 		val consoleOutput = consoleWindow.consoleOutput

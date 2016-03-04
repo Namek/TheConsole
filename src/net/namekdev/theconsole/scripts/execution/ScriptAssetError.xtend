@@ -1,4 +1,4 @@
-package net.namekdev.theconsole.scripts
+package net.namekdev.theconsole.scripts.execution
 
 class ScriptAssertError extends Error {
 	public val String text

@@ -6,9 +6,9 @@ import javafx.event.EventHandler
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import net.namekdev.theconsole.commands.base.IAliasManager
-import net.namekdev.theconsole.scripts.ScriptAssertError
 import net.namekdev.theconsole.scripts.base.IScript
 import net.namekdev.theconsole.scripts.base.IScriptManager
+import net.namekdev.theconsole.scripts.execution.ScriptAssertError
 import net.namekdev.theconsole.view.base.IConsoleOutput
 import net.namekdev.theconsole.view.base.IConsoleOutputEntry
 import net.namekdev.theconsole.view.base.IConsolePromptInput
@@ -303,7 +303,7 @@ class CommandLineService {
 
 			if (runAsJavaScript) {
 				// script was not found, so try to execute it as pure JavaScript!
-				val result = scriptManager.runJs(fullCommand) as Object
+				val result = scriptManager.runUnscopedJs(fullCommand) as Object
 
 				if (result instanceof Exception) {
 					consoleOutput.addErrorEntry(result.toString())
