@@ -1,5 +1,6 @@
 package net.namekdev.theconsole.view
 
+import javafx.application.Platform
 import javafx.event.EventHandler
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
@@ -7,16 +8,14 @@ import javafx.scene.control.TextField
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Pane
-import org.eclipse.fx.ui.controls.styledtext.StyledTextArea
-import javafx.scene.input.KeyCode
-import net.namekdev.theconsole.view.base.IConsolePromptInput
 import net.namekdev.theconsole.view.base.IConsoleOutput
-import javafx.application.Platform
+import net.namekdev.theconsole.view.base.IConsolePromptInput
 
 class ConsoleWindow extends AnchorPane {
 	@FXML public Pane outputPane
 	@FXML public TextField promptInput
-	StyledTextArea outputTextArea
+
+	public val IConsoleOutput consoleOutput
 
 	var EventHandler<KeyEvent> keyPressHandler
 
@@ -29,13 +28,7 @@ class ConsoleWindow extends AnchorPane {
 
 		getStylesheets().add(getClass().getResource("ConsoleWindow.css").toExternalForm())
 
-		outputTextArea = new StyledTextArea()
-		outputTextArea.editable = false
-		outputTextArea.content.text = "color test"
-		outputTextArea.prefWidthProperty().bind(outputPane.widthProperty())
-		outputTextArea.prefHeightProperty().bind(outputPane.heightProperty())
-		outputTextArea.focusTraversable = false
-		outputPane.children.add(outputTextArea)
+		consoleOutput = new ConsoleOutput(this)
 
 		promptInput.onKeyPressed = promptInputKeyPressHandler
 	}
@@ -69,33 +62,4 @@ class ConsoleWindow extends AnchorPane {
 			keyPressHandler = handler
 		}
 	}
-
-	public val consoleOutput = new IConsoleOutput {
-		override addTextEntry(String text, int colorHex) {
-//			outputTextArea.content.text += text
-			outputTextArea.content.text = text
-			return null
-		}
-
-		override addTextEntry(String text) {
-			addTextEntry(text, 0xFFFFFF)
-		}
-
-		override addErrorEntry(String text) {
-			addTextEntry(text, 0xFF0000)
-		}
-
-		override addInputEntry(String text) {
-			return addTextEntry("< " + text)
-		}
-
-		override addLogEntry(String text) {
-			addTextEntry(text)
-		}
-
-		override clear() {
-			outputTextArea.content.text = ""
-		}
-	}
-
 }
