@@ -3,8 +3,6 @@ package net.namekdev.theconsole.view
 import java.util.logging.Level
 import java.util.logging.Logger
 import javafx.scene.Scene
-import javafx.scene.control.TextField
-import javafx.scene.layout.BorderPane
 import javax.swing.JFrame
 import org.jnativehook.GlobalScreen
 import org.jnativehook.NativeInputEvent
@@ -13,11 +11,12 @@ import org.jnativehook.keyboard.NativeKeyListener
 
 class ConsoleApp implements NativeKeyListener {
 	JFrame hostWindow
-	Scene scene
+	ConsoleWindow consoleWindow
 
 	new() {
-		initScene()
-		hostWindow = new UndecoratedUtilityWindow(scene)
+		consoleWindow = new ConsoleWindow()
+		hostWindow = new UndecoratedUtilityWindow(new Scene(consoleWindow))
+		hostWindow.opacity = 0.85f
 
 		val nativeHookLogger = Logger.getLogger(typeof(GlobalScreen).getPackage().getName())
 		nativeHookLogger.setLevel(Level.WARNING)
@@ -26,15 +25,6 @@ class ConsoleApp implements NativeKeyListener {
 		GlobalScreen.addNativeKeyListener(this)
 
 		hostWindow.setVisible(true)
-	}
-
-	def initScene() {
-		val root = new BorderPane()
-		scene = new Scene(root)
-		scene.getStylesheets().add(getClass().getResource("/net/namekdev/theconsole/view/ConsoleWindow.css").toExternalForm())
-
-		val commandPrompt = new TextField()
-		root.bottom = commandPrompt
 	}
 
 

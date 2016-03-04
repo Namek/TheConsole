@@ -1,5 +1,41 @@
-/* JavaFX CSS - Leave this comment until you have at least create one rule which uses -fx-Property */
-
 .root {
-	-fx-background-color: red;
+	-fx-background-color: rgba(0, 0, 0, 1);
+}
+
+.styled-text-area {
+	-fx-font-size: 16;
+	-fx-font-family: Consolas;
+}
+
+.styled-text-area .list-view {
+	-fx-background-color: none;
+}
+
+.styled-text-area .source-segment {
+	/* @SuppressWarning */
+	-styled-text-color: white;
+	-fx-fill: -styled-text-color;
+}
+
+.styled-text-area .current-line {
+	-fx-background-color: none;
+}
+
+.styled-text-area .scroll-bar {
+	-fx-background-color: transparent;
+}
+
+.styled-text-area .scroll-bar:horizontal {
+	-fx-opacity: 0;
+}
+
+
+#prompt-input {
+	-fx-background-color: black;
+	-fx-text-fill: white;
+	-fx-font-family: Consolas;
+	-fx-font-size: 16;
+
+	-fx-border-color: rgba(240, 20, 0, 0.5);
+	-fx-border-width: 3;
 }
