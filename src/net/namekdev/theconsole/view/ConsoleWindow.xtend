@@ -71,16 +71,30 @@ class ConsoleWindow extends AnchorPane {
 	}
 
 	public val consoleOutput = new IConsoleOutput {
-		override addTextEntry(String text) {
+		override addTextEntry(String text, int colorHex) {
+//			outputTextArea.content.text += text
+			outputTextArea.content.text = text
+			return null
+		}
 
+		override addTextEntry(String text) {
+			addTextEntry(text, 0xFFFFFF)
 		}
 
 		override addErrorEntry(String text) {
-			throw new UnsupportedOperationException("TODO: auto-generated method stub")
+			addTextEntry(text, 0xFF0000)
 		}
 
 		override addInputEntry(String text) {
 			return addTextEntry("< " + text)
+		}
+
+		override addLogEntry(String text) {
+			addTextEntry(text)
+		}
+
+		override clear() {
+			outputTextArea.content.text = ""
 		}
 	}
 

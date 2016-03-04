@@ -17,6 +17,7 @@ import net.namekdev.theconsole.scripts.execution.JsUtilsProvider
 import net.namekdev.theconsole.utils.base.IDatabase
 import net.namekdev.theconsole.utils.Database
 import net.namekdev.theconsole.utils.PathUtils
+import net.namekdev.theconsole.scripts.ConsoleProxy
 
 class ConsoleApp implements NativeKeyListener {
 	JFrame hostWindow
@@ -32,12 +33,16 @@ class ConsoleApp implements NativeKeyListener {
 		hostWindow = new UndecoratedUtilityWindow(new Scene(consoleWindow))
 		hostWindow.opacity = 0.85f
 
-		database = new Database(PathUtils.appSettingsDir + "/settings.db")
-		jsUtils = new JsUtilsProvider(null /* TODO */)
-		scriptManager = new JsScriptManager(jsUtils, database)
-		aliasManager = new AliasManager
 		val consolePrompt = consoleWindow.consolePromptInput
 		val consoleOutput = consoleWindow.consoleOutput
+		val windowController = null
+		val consoleProxy = new ConsoleProxy(consoleOutput, windowController);
+
+		database = new Database(PathUtils.appSettingsDir + "/settings.db")
+		jsUtils = new JsUtilsProvider(null /* TODO */)
+		scriptManager = new JsScriptManager(jsUtils, database, consoleProxy)
+		aliasManager = new AliasManager
+
 		new CommandLineService(consolePrompt, consoleOutput, scriptManager, aliasManager)
 
 		val nativeHookLogger = Logger.getLogger(typeof(GlobalScreen).getPackage().getName())

@@ -38,6 +38,7 @@ class JsScriptManager implements IScriptManager {
 	JsUtilsProvider jsUtils
 	IDatabase settingsDatabase
 	IDatabase.ISectionAccessor scriptsDatabase
+	ConsoleProxy console
 
 	final Path scriptsWatchDir = PathUtils.scriptsDir
 	private PathMatcher scriptExtensionMatcher
@@ -45,10 +46,11 @@ class JsScriptManager implements IScriptManager {
 	val tempArgs = new TemporaryArgs
 
 
-	new(JsUtilsProvider jsUtils, IDatabase database) {
+	new(JsUtilsProvider jsUtils, IDatabase database, ConsoleProxy console) {
 		this.jsUtils = jsUtils
 		this.settingsDatabase = database
 		this.scriptsDatabase = settingsDatabase.getScriptsSection()
+		this.console = console
 		createJsEnvironment()
 
 		val fs = FileSystems.getDefault()
@@ -56,7 +58,7 @@ class JsScriptManager implements IScriptManager {
 
 		if (!Files.isDirectory(scriptsWatchDir)) {
 			val path = scriptsWatchDir.toAbsolutePath().toString()
-//			console.log("No scripts folder found, creating a new one: " + path)
+			console.log("No scripts folder found, creating a new one: " + path)
 			new File(path).mkdirs()
 		}
 
@@ -69,7 +71,7 @@ class JsScriptManager implements IScriptManager {
 			watcher.start()
 		}
 		catch (IOException exc) {
-//			console.error(exc.toString())
+			console.error(exc.toString())
 		}
 	}
 
@@ -77,7 +79,7 @@ class JsScriptManager implements IScriptManager {
 		jsEnv = new JavaScriptExecutor()
 		jsEnv.bindObject("Utils", jsUtils)
 		jsEnv.bindObject("TemporaryArgs", tempArgs)
-//		jsEnv.bindObject("console", console)
+		jsEnv.bindObject("console", console)
 
 		jsEnv.bindObject("assert", new BiConsumer<Boolean, String> {
 			override accept(Boolean condition, String error) {
@@ -152,7 +154,7 @@ class JsScriptManager implements IScriptManager {
 		var diff = 0 as int
 
 		try {
-//			console.log("Analyzing folder structure for ." + SCRIPT_FILE_EXTENSION + " files: " + folder)
+			console.log("Analyzing folder structure for ." + SCRIPT_FILE_EXTENSION + " files: " + folder)
 
 			val scriptsCount = scriptNames.size
 
@@ -171,11 +173,11 @@ class JsScriptManager implements IScriptManager {
 			diff = scriptNames.size - scriptsCount
 
 			if (diff == 0) {
-//				console.log("No scripts were loaded.")
+				console.log("No scripts were loaded.")
 			}
 		}
 		catch (IOException exc) {
-//			console.error(exc.toString())
+			console.error(exc.toString())
 		}
 
 		return diff
@@ -196,20 +198,20 @@ class JsScriptManager implements IScriptManager {
 			var script = get(scriptName)
 
 			if (script == null) {
-//				console.log("Loading script: " + scriptName)
+				console.log("Loading script: " + scriptName)
 				script = new JsScript(this, scriptName, code)
 				put(scriptName, script)
 			}
 			else if (script instanceof JsScript) {
-//				console.log("Reloading script: " + scriptName)
+				console.log("Reloading script: " + scriptName)
 				(script as JsScript).code = code
 			}
 			else {
-//				console.error("Cannot overwrite core script: " + scriptName)
+				console.error("Cannot overwrite core script: " + scriptName)
 			}
 		}
 		catch (IOException exc) {
-//			console.error(exc.toString())
+			console.error(exc.toString())
 		}
 	}
 
