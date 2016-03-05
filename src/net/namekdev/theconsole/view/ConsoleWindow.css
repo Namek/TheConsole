@@ -2,6 +2,36 @@
 	-fx-background-color: rgba(0, 0, 0, 1);
 }
 
+.output {
+	-fx-font-size: 16;
+	-fx-font-family: Consolas;
+}
+
+.output .text-entry {
+	-fx-fill: white;
+}
+
+.output .text-entry.input-entry {
+	-fx-fill: gray;
+}
+
+.output .text-entry.error-entry {
+	-fx-fill: red;
+}
+
+#prompt-input {
+	-fx-background-color: black;
+	-fx-text-fill: white;
+	-fx-font-family: Consolas;
+	-fx-font-size: 16;
+
+	-fx-border-color: rgba(240, 20, 0, 0.5);
+	-fx-border-width: 3;
+}
+
+
+
+/*
 .styled-text-area {
 	-fx-font-size: 16;
 	-fx-font-family: Consolas;
@@ -12,7 +42,6 @@
 }
 
 .styled-text-area .source-segment {
-	/* @SuppressWarning */
 	-styled-text-color: white;
 	-fx-fill: -styled-text-color;
 }
@@ -28,14 +57,4 @@
 .styled-text-area .scroll-bar:horizontal {
 	-fx-opacity: 0;
 }
-
-
-#prompt-input {
-	-fx-background-color: black;
-	-fx-text-fill: white;
-	-fx-font-family: Consolas;
-	-fx-font-size: 16;
-
-	-fx-border-color: rgba(240, 20, 0, 0.5);
-	-fx-border-width: 3;
-}
+*/
