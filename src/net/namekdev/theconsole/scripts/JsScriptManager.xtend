@@ -14,8 +14,8 @@ import java.util.Map
 import java.util.Queue
 import java.util.TreeMap
 import java.util.function.BiConsumer
-import net.namekdev.theconsole.scripts.base.IScript
-import net.namekdev.theconsole.scripts.base.IScriptManager
+import net.namekdev.theconsole.scripts.api.IScript
+import net.namekdev.theconsole.scripts.api.IScriptManager
 import net.namekdev.theconsole.scripts.execution.JavaScriptExecutor
 import net.namekdev.theconsole.scripts.execution.JsUtilsProvider
 import net.namekdev.theconsole.utils.PathUtils

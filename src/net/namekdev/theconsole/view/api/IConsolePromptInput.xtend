@@ -1,4 +1,4 @@
-package net.namekdev.theconsole.view.base
+package net.namekdev.theconsole.view.api
 
 import javafx.event.EventHandler
 import javafx.scene.input.KeyEvent

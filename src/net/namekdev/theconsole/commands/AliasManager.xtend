@@ -1,6 +1,6 @@
 package net.namekdev.theconsole.commands
 
-import net.namekdev.theconsole.commands.base.IAliasManager
+import net.namekdev.theconsole.commands.api.IAliasManager
 import java.util.ArrayList
 
 class AliasManager implements IAliasManager {

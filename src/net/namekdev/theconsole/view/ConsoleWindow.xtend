@@ -8,8 +8,8 @@ import javafx.scene.control.TextField
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Pane
-import net.namekdev.theconsole.view.base.IConsoleOutput
-import net.namekdev.theconsole.view.base.IConsolePromptInput
+import net.namekdev.theconsole.view.api.IConsoleOutput
+import net.namekdev.theconsole.view.api.IConsolePromptInput
 
 class ConsoleWindow extends AnchorPane {
 	@FXML public Pane outputPane

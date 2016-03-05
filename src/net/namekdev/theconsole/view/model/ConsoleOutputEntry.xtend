@@ -1,7 +1,7 @@
 package net.namekdev.theconsole.view.model
 
 import com.sun.media.jfxmediaimpl.MediaDisposer.Disposable
-import net.namekdev.theconsole.view.base.IConsoleOutputEntry
+import net.namekdev.theconsole.view.api.IConsoleOutputEntry
 import org.w3c.dom.Element
 import org.w3c.dom.Text
 

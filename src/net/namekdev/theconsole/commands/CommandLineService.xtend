@@ -5,13 +5,13 @@ import java.util.regex.Pattern
 import javafx.event.EventHandler
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
-import net.namekdev.theconsole.commands.base.IAliasManager
-import net.namekdev.theconsole.scripts.base.IScript
-import net.namekdev.theconsole.scripts.base.IScriptManager
+import net.namekdev.theconsole.commands.api.IAliasManager
+import net.namekdev.theconsole.scripts.api.IScript
+import net.namekdev.theconsole.scripts.api.IScriptManager
 import net.namekdev.theconsole.scripts.execution.ScriptAssertError
-import net.namekdev.theconsole.view.base.IConsoleOutput
-import net.namekdev.theconsole.view.base.IConsoleOutputEntry
-import net.namekdev.theconsole.view.base.IConsolePromptInput
+import net.namekdev.theconsole.view.api.IConsoleOutput
+import net.namekdev.theconsole.view.api.IConsoleOutputEntry
+import net.namekdev.theconsole.view.api.IConsolePromptInput
 
 class CommandLineService {
 	IConsolePromptInput consolePrompt

@@ -1,7 +1,7 @@
 package net.namekdev.theconsole.scripts
 
-import net.namekdev.theconsole.view.base.IConsoleOutput
-import net.namekdev.theconsole.view.base.IWindowController
+import net.namekdev.theconsole.view.api.IConsoleOutput
+import net.namekdev.theconsole.view.api.IWindowController
 
 class ConsoleProxy {
 	IConsoleOutput consoleOutput

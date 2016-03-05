@@ -1,4 +1,4 @@
-package net.namekdev.theconsole.view.base
+package net.namekdev.theconsole.view.api
 
 interface IConsoleOutput {
 	def IConsoleOutputEntry addTextEntry(String text)

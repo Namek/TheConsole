@@ -6,18 +6,18 @@ import javafx.scene.Scene
 import javax.swing.JFrame
 import net.namekdev.theconsole.commands.AliasManager
 import net.namekdev.theconsole.commands.CommandLineService
-import net.namekdev.theconsole.commands.base.IAliasManager
+import net.namekdev.theconsole.commands.api.IAliasManager
+import net.namekdev.theconsole.scripts.ConsoleProxy
 import net.namekdev.theconsole.scripts.JsScriptManager
-import net.namekdev.theconsole.scripts.base.IScriptManager
+import net.namekdev.theconsole.scripts.api.IScriptManager
+import net.namekdev.theconsole.scripts.execution.JsUtilsProvider
+import net.namekdev.theconsole.utils.Database
+import net.namekdev.theconsole.utils.PathUtils
+import net.namekdev.theconsole.utils.base.IDatabase
 import org.jnativehook.GlobalScreen
 import org.jnativehook.NativeInputEvent
 import org.jnativehook.keyboard.NativeKeyEvent
 import org.jnativehook.keyboard.NativeKeyListener
-import net.namekdev.theconsole.scripts.execution.JsUtilsProvider
-import net.namekdev.theconsole.utils.base.IDatabase
-import net.namekdev.theconsole.utils.Database
-import net.namekdev.theconsole.utils.PathUtils
-import net.namekdev.theconsole.scripts.ConsoleProxy
 
 class ConsoleApp implements NativeKeyListener {
 	JFrame hostWindow

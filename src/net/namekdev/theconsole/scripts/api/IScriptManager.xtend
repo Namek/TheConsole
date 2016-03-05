@@ -1,4 +1,4 @@
-package net.namekdev.theconsole.scripts.base
+package net.namekdev.theconsole.scripts.api
 
 import java.util.ArrayList
 

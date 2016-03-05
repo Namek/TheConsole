@@ -8,7 +8,7 @@ import javafx.concurrent.Worker
 import javafx.scene.layout.Pane
 import javafx.scene.web.WebEngine
 import javafx.scene.web.WebView
-import net.namekdev.theconsole.view.base.IConsoleOutput
+import net.namekdev.theconsole.view.api.IConsoleOutput
 import net.namekdev.theconsole.view.model.ConsoleOutputEntry
 import org.w3c.dom.Element
 import org.w3c.dom.Text

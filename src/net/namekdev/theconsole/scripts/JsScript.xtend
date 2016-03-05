@@ -1,7 +1,6 @@
 package net.namekdev.theconsole.scripts
 
-import net.namekdev.theconsole.scripts.JsScript.Context
-import net.namekdev.theconsole.scripts.base.IScript
+import net.namekdev.theconsole.scripts.api.IScript
 
 /**
  * This class doesn't have any intelligence since it's totally managed/modified by {@link JsScriptManager}.
