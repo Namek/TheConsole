@@ -5,8 +5,9 @@ interface IConsoleOutputEntry {
 	public static val OUTPUT = 2
 	public static val OUTPUT_ERROR = 3
 
+	def boolean isValid()
 
-	def void setText(String string)
+	def void setText(String text)
 	def String getText()
 
 	def void setType(int type)

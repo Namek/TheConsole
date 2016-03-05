@@ -205,11 +205,17 @@ class CommandLineService {
 					}
 				}
 
+				if (lastAddedEntry != null) {
+					if (!lastAddedEntry.valid) {
+						lastAddedEntry = null
+					}
+				}
+
 				if (lastAddedEntry == null || lastAddedEntry.type != IConsoleOutputEntry.INPUT) {
 					lastAddedEntry = consoleOutput.addTextEntry(sb.toString())
 					lastAddedEntry.type = IConsoleOutputEntry.INPUT
 				}
-				else {
+				else if (lastAddedEntry != null) {
 					// modify existing text entry
 					lastAddedEntry.setText(sb.toString())
 				}

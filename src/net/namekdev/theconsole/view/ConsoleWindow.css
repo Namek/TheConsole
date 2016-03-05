@@ -2,34 +2,6 @@
 	-fx-background-color: rgba(0, 0, 0, 1);
 }
 
-.styled-text-area {
-	-fx-font-size: 16;
-	-fx-font-family: Consolas;
-}
-
-.styled-text-area .list-view {
-	-fx-background-color: none;
-}
-
-.styled-text-area .source-segment {
-	/* @SuppressWarning */
-	-styled-text-color: white;
-	-fx-fill: -styled-text-color;
-}
-
-.styled-text-area .current-line {
-	-fx-background-color: none;
-}
-
-.styled-text-area .scroll-bar {
-	-fx-background-color: transparent;
-}
-
-.styled-text-area .scroll-bar:horizontal {
-	-fx-opacity: 0;
-}
-
-
 #prompt-input {
 	-fx-background-color: black;
 	-fx-text-fill: white;
