@@ -1,0 +1,17 @@
+body {
+	background-color: rgba(0,0,0, 1);
+	font-size: 16px;
+	font-family: Consolas;
+}
+
+.entry-text {
+	color: white;
+}
+
+.entry-text.entry-error {
+	color: red;
+}
+
+.entry-text.entry-input {
+	color: gray;
+}
