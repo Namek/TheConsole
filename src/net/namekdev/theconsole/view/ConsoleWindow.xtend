@@ -28,7 +28,7 @@ class ConsoleWindow extends AnchorPane {
 
 		getStylesheets().add(getClass().getResource("ConsoleWindow.css").toExternalForm())
 
-		consoleOutput = new ConsoleOutput(this)
+		consoleOutput = new ConsoleOutput(outputPane)
 
 		promptInput.onKeyPressed = promptInputKeyPressHandler
 	}

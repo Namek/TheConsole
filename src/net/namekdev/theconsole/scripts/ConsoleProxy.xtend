@@ -13,7 +13,7 @@ class ConsoleProxy {
 	}
 
 	def void log(String text) {
-		consoleOutput.addTextEntry(text);
+		consoleOutput.addTextEntry(text)
 	}
 
 	/**
