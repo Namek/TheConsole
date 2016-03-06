@@ -6,6 +6,10 @@ import java.io.File
 import java.io.FileReader
 import net.namekdev.theconsole.utils.base.IDatabase.ISectionAccessor
 import net.namekdev.theconsole.utils.base.IDatabase
+import com.eclipsesource.json.Json
+import com.eclipsesource.json.JsonValue
+import com.eclipsesource.json.JsonObject
+import com.eclipsesource.json.ParseException
 
 /**
  * Reads database file once. Gives a possibility to overwrite it.
@@ -13,49 +17,53 @@ import net.namekdev.theconsole.utils.base.IDatabase
  *
  * @author Namek
  */
-public class Database implements IDatabase {
-	protected final String ALIASES_SECTION = "aliases";
-	protected final String SCRIPTS_SECTION = "scripts";
+class Database implements IDatabase {
+	protected final String ALIASES_SECTION = "aliases"
+	protected final String SCRIPTS_SECTION = "scripts"
 
-	private File file;
-//	public JsonValue content;
+	private File file
+	public JsonObject content
 
 
-	new(String filePath) {
-		file = new File(filePath);
-		file.getParentFile().mkdirs();
+	override load(String filePath) {
+		file = new File(filePath)
+		file.getParentFile().mkdirs()
 
 		if (!file.exists()) {
 			try {
-				file.createNewFile();
+				file.createNewFile()
 			}
 			catch (IOException e) {
-				e.printStackTrace();
+				e.printStackTrace()
 			}
 		}
 
-		try {
-			/*if (file.exists()) {
-				val fileStream = new FileReader(file)
-				val reader = new JsonReader()
-				content = reader.parse(fileStream)
+		var JsonValue content
+
+		if (file.exists()) {
+			val fileStream = new FileReader(file)
+			try {
+				content = Json.parse(fileStream).asObject
 				fileStream.close()
 			}
+			catch (ParseException exc) {
+				if (file.length > 0) {
+					// TODO maybe copy file?
+					exc.printStackTrace()
+					this.content = Json.object()
+					throw new RuntimeException("Couldn't parse " + file + ": " + exc.message, exc)
+				}
+			}
+		}
 
-			if (content == null) {
-				content = new JsonValue(ValueType.object)
-			}*/
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}
+		this.content = if (content == null) Json.object() else content.asObject
 	}
 
 	override save() {
 		try {
-			/*val stream = new FileWriter(file, false)
+			val stream = new FileWriter(file, false)
 			stream.write(content.toString())
-			stream.close()*/
+			stream.close()
 		}
 		catch (IOException e) {
 			e.printStackTrace()
@@ -63,42 +71,41 @@ public class Database implements IDatabase {
 	}
 
 	override getSection(String section, boolean createIfDoesntExist) {
-		return null //TODO
-//		return getSection(content, section, createIfDoesntExist);
+		return getSection(content, section, createIfDoesntExist)
 	}
 
 	override getAliasesSection() {
-		return getSection(ALIASES_SECTION, true);
+		return getSection(ALIASES_SECTION, true)
 	}
 
 	override getScriptsSection() {
-		return getSection(SCRIPTS_SECTION, true);
+		return getSection(SCRIPTS_SECTION, true)
 	}
 
-	/*def private SectionAccessor getSection(JsonValue root, String section, boolean createIfDoesntExist) {
-		var tree = null as JsonValue
+	def private SectionAccessor getSection(JsonObject root, String section, boolean createIfDoesntExist) {
+		var tree = null as JsonObject
 
 		if (createIfDoesntExist) {
-			tree = JsonUtils.getOrCreateChild(root, section, ValueType.object)
+			tree = JsonUtils.getOrCreateChildObject(root.asObject, section)
 		}
 		else {
-			tree = root.get(section)
+			tree = root.get(section).asObject
 		}
 
-		return new SectionAccessor(tree)
-	}*/
+		return new SectionAccessor(this, tree)
+	}
 
-	// TODO
 	static class SectionAccessor implements ISectionAccessor {
-		/*public final JsonValue root;
+		val Database database
+		public val JsonObject root
 
-		SectionAccessor(JsonValue tree) {
-			this.root = tree;
-		}*/
+		new(Database database, JsonObject tree) {
+			this.database = database
+			this.root = tree
+		}
 
 		override has(String key) {
-			return false
-//			return root.has(key)
+			return root.get(key) != null
 		}
 
 		override get(String key) {
@@ -106,34 +113,32 @@ public class Database implements IDatabase {
 		}
 
 		override get(String key, boolean emptyStringIfDoesntExist) {
-			return if (emptyStringIfDoesntExist) "" else null
-//			return root.has(key) ? root.get(key).asString() : (emptyStringIfDoesntExist ? "" : null);
+			if (has(key))
+				return root.get(key).asString()
+			else
+				return if (emptyStringIfDoesntExist) "" else null
 		}
 
 		override set(String key, String value) {
-//			JsonValue tree = JsonUtils.getOrCreateChild(root, key, ValueType.stringValue)
-//			tree.set(value)
+			root.set(key, value)
 		}
 
 		override remove(String key) {
-//			if (root.has(key)) {
-//				root.remove(key)
-//			}
+			root.remove(key)
 		}
 
 		override save() {
-//			Database.this.save()
+			database.save()
 		}
 
 		override getSection(String section, boolean createIfDoesntExist) {
-			return null
-//			return Database.this.getSection(root, section, createIfDoesntExist);
+			return database.getSection(root, section, createIfDoesntExist)
 		}
 
 		// FIXME? This one's name doesn't fit in this local context but I didn't want to create
 		// some weird OOP templatish or compositional abstraction for it - for now. :)
 		override getGlobalStorage(String storageName) {
-//			return Database.this.getSection(content, storageName, true);
+			return database.getSection(database.content, storageName, true)
 		}
 	}
 }

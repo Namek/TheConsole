@@ -18,6 +18,7 @@ import org.jnativehook.GlobalScreen
 import org.jnativehook.NativeInputEvent
 import org.jnativehook.keyboard.NativeKeyEvent
 import org.jnativehook.keyboard.NativeKeyListener
+import com.eclipsesource.json.ParseException
 
 class ConsoleApp implements NativeKeyListener {
 	JFrame hostWindow
@@ -36,9 +37,15 @@ class ConsoleApp implements NativeKeyListener {
 		val consolePrompt = consoleWindow.consolePromptInput
 		val consoleOutput = consoleWindow.consoleOutput
 		val windowController = null
-		val consoleProxy = new ConsoleProxy(consoleOutput, windowController);
+		val consoleProxy = new ConsoleProxy(consoleOutput, windowController)
 
-		database = new Database(PathUtils.appSettingsDir + "/settings.db")
+		database = new Database
+		try {
+			database.load(PathUtils.appSettingsDir + "/settings.db")
+		}
+		catch (RuntimeException exc) {
+			consoleProxy.error(exc.message)
+		}
 		jsUtils = new JsUtilsProvider(null /* TODO */)
 		scriptManager = new JsScriptManager(jsUtils, database, consoleProxy)
 		aliasManager = new AliasManager

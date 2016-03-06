@@ -1,6 +1,7 @@
 package net.namekdev.theconsole.utils.base
 
 interface IDatabase {
+	def void load(String path)
 	def void save()
 	def ISectionAccessor getSection(String section, boolean createIfDoesntExist)
 	def ISectionAccessor getAliasesSection()
