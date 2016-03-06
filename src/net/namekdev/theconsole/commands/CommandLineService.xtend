@@ -166,7 +166,7 @@ class CommandLineService {
 				}
 				else {
 					// Present options
-					var sb = new StringBuilder()
+					var sb = new StringBuilder('---\n')
 					for (var i = 0; i < commandNames.size; i++) {
 						sb.append(commandNames.get(i))
 
@@ -178,9 +178,12 @@ class CommandLineService {
 					val text = sb.toString()
 
 					// Don't add the same output second time
-					if (lastAddedEntry != null && lastAddedEntry.type == IConsoleOutputEntry.INPUT && !lastAddedEntry.text.equals(text)) {
+					if (lastAddedEntry == null || lastAddedEntry.type != IConsoleOutputEntry.INPUT) {
 						lastAddedEntry = consoleOutput.addTextEntry(text)
 						lastAddedEntry.type = IConsoleOutputEntry.INPUT
+					}
+					else if (lastAddedEntry != null) {
+						lastAddedEntry.setText(text)
 					}
 				}
 
@@ -193,14 +196,14 @@ class CommandLineService {
 				commandNames.clear()
 				commandNames.addAll(allScriptNames)
 				commandNames.addAll(allAliasNames)
-				commandNames.sort()
+				val sortedCommands = commandNames.sort()
 
-				val sb = new StringBuilder()
+				val sb = new StringBuilder('---\n')
 
-				for (var i = 0; i < commandNames.size; i++) {
-					sb.append(commandNames.get(i))
+				for (var i = 0; i < sortedCommands.size; i++) {
+					sb.append(sortedCommands.get(i))
 
-					if (i != commandNames.size-1) {
+					if (i != sortedCommands.size-1) {
 						sb.append(NEW_LINE_CHAR)
 					}
 				}
@@ -348,7 +351,9 @@ class CommandLineService {
 					}
 				}
 
-				charIndex++
+				if (isSearching) {
+					charIndex++
+				}
 			}
 
 			return names.get(0).substring(0, charIndex)

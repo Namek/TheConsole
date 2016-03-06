@@ -1,17 +1,20 @@
 package net.namekdev.theconsole.view.model
 
 import com.sun.media.jfxmediaimpl.MediaDisposer.Disposable
+import net.namekdev.theconsole.view.ConsoleOutput
 import net.namekdev.theconsole.view.api.IConsoleOutputEntry
 import org.w3c.dom.Element
 import org.w3c.dom.Text
 
 class ConsoleOutputEntry implements IConsoleOutputEntry, Disposable {
+	ConsoleOutput consoleOutput
 	public Element entryNode
 	public Text textNode
 	boolean isDisposed = false
 	int type
 
-	new() {
+	new(ConsoleOutput consoleOutput) {
+		this.consoleOutput = consoleOutput
 	}
 
 	override isValid() {
@@ -19,7 +22,12 @@ class ConsoleOutputEntry implements IConsoleOutputEntry, Disposable {
 	}
 
 	override setText(String text) {
+		val shouldScroll = consoleOutput.isScrolledToBottom
 		textNode.textContent = text
+
+		if (shouldScroll) {
+			consoleOutput.scrollToBottom()
+		}
 	}
 
 	override getText() {

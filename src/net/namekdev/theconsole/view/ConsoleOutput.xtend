@@ -13,7 +13,7 @@ import net.namekdev.theconsole.view.model.ConsoleOutputEntry
 import org.w3c.dom.Element
 import org.w3c.dom.Text
 
-package class ConsoleOutput implements IConsoleOutput {
+class ConsoleOutput implements IConsoleOutput {
 	WebView web = new WebView
 	WebEngine engine
 
@@ -45,18 +45,18 @@ package class ConsoleOutput implements IConsoleOutput {
 		return engine.loadWorker.state == Worker.State.SUCCEEDED
 	}
 
-	def private boolean isScrolledToBottom() {
+	def boolean isScrolledToBottom() {
 		val script = '(window.innerHeight + window.scrollY) >= document.body.offsetHeight'
 		return engine.executeScript(script) as Boolean
 	}
 
-	def private void scrollToBottom() {
+	def void scrollToBottom() {
 		val script = 'window.scrollTo(0, document.body.scrollHeight)'
 		engine.executeScript(script)
 	}
 
 	def private createEntry() {
-		val entry = new ConsoleOutputEntry()
+		val entry = new ConsoleOutputEntry(this)
 		entries.add(entry)
 		return entry
 	}
