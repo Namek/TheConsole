@@ -69,7 +69,7 @@ package class ConsoleOutput implements IConsoleOutput {
 
 			val doc = engine.document
 			val body = doc.getElementsByTagName("body").item(0)
-			val entryNode = doc.createElement("div")
+			val entryNode = doc.createElement("pre")
 			val textNode = doc.createTextNode(text)
 
 			entryNode.appendChild(textNode)
