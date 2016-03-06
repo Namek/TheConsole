@@ -45,6 +45,16 @@ package class ConsoleOutput implements IConsoleOutput {
 		return engine.loadWorker.state == Worker.State.SUCCEEDED
 	}
 
+	def private boolean isScrolledToBottom() {
+		val script = '(window.innerHeight + window.scrollY) >= document.body.offsetHeight'
+		return engine.executeScript(script) as Boolean
+	}
+
+	def private void scrollToBottom() {
+		val script = 'window.scrollTo(0, document.body.scrollHeight)'
+		engine.executeScript(script)
+	}
+
 	def private createEntry() {
 		val entry = new ConsoleOutputEntry()
 		entries.add(entry)
@@ -55,6 +65,8 @@ package class ConsoleOutput implements IConsoleOutput {
 		val entry = createEntry()
 
 		val Runnable task = [
+			val wasAlreadyScrolled = isScrolledToBottom()
+
 			val doc = engine.document
 			val body = doc.getElementsByTagName("body").item(0)
 			val entryNode = doc.createElement("div")
@@ -74,6 +86,10 @@ package class ConsoleOutput implements IConsoleOutput {
 
 			if (nodeModifier != null) {
 				nodeModifier.accept(entryNode, textNode)
+			}
+
+			if (wasAlreadyScrolled) {
+				scrollToBottom()
 			}
 		]
 
