@@ -1,9 +1,16 @@
 package net.namekdev.theconsole.scripts.api
 
 import java.util.ArrayList
+import net.namekdev.theconsole.utils.base.IDatabase.ISectionAccessor
 
 interface IScriptManager {
 	def IScript get(String name)
+
+	def void put(String name, IScript script)
+
+	def void remove(String name)
+
+	def ISectionAccessor createScriptStorage(String string)
 
 	/**
 	 * Get internal array for performance reasons. Do not modify it!

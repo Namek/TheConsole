@@ -11,6 +11,7 @@ import net.namekdev.theconsole.scripts.ConsoleProxy
 import net.namekdev.theconsole.scripts.JsScriptManager
 import net.namekdev.theconsole.scripts.api.IScriptManager
 import net.namekdev.theconsole.scripts.execution.JsUtilsProvider
+import net.namekdev.theconsole.scripts.internal.AliasScript
 import net.namekdev.theconsole.utils.Database
 import net.namekdev.theconsole.utils.PathUtils
 import net.namekdev.theconsole.utils.base.IDatabase
@@ -18,7 +19,6 @@ import org.jnativehook.GlobalScreen
 import org.jnativehook.NativeInputEvent
 import org.jnativehook.keyboard.NativeKeyEvent
 import org.jnativehook.keyboard.NativeKeyListener
-import com.eclipsesource.json.ParseException
 
 class ConsoleApp implements NativeKeyListener {
 	JFrame hostWindow
@@ -48,9 +48,13 @@ class ConsoleApp implements NativeKeyListener {
 		}
 		jsUtils = new JsUtilsProvider(null /* TODO */)
 		scriptManager = new JsScriptManager(jsUtils, database, consoleProxy)
-		aliasManager = new AliasManager
+
+		val aliasStorage = database.aliasesSection
+		aliasManager = new AliasManager(aliasStorage)
 
 		new CommandLineService(consolePrompt, consoleOutput, scriptManager, aliasManager)
+
+		scriptManager.put("alias", new AliasScript(aliasManager, aliasStorage, jsUtils, consoleProxy))
 
 		val nativeHookLogger = Logger.getLogger(typeof(GlobalScreen).getPackage().getName())
 		nativeHookLogger.setLevel(Level.WARNING)

@@ -98,18 +98,16 @@ class JsScriptManager implements IScriptManager {
 		return scripts.get(name)
 	}
 
-	def JsScriptManager put(String name, IScript script) {
+	override put(String name, IScript script) {
 		scripts.put(name, script)
 
 		if (!scriptNames.exists[n|n.equals(name)]) {
 			scriptNames.add(name)
 			scriptNames.sort()
 		}
-
-		return this
 	}
 
-	def void remove(String name) {
+	override remove(String name) {
 		scripts.remove(name)
 		scriptNames.removeIf[n|n.equals(name)]
 	}
@@ -133,9 +131,8 @@ class JsScriptManager implements IScriptManager {
 		return runUnscopedJs("(function(args, Storage) {" + code + "})(Java.from(TemporaryArgs.args), TemporaryArgs.context.Storage)")
 	}
 
-	def IDatabase.ISectionAccessor createScriptStorage(String name) {
-		return null
-//		return scriptsDatabase.getSection(name, true)
+	override createScriptStorage(String name) {
+		return scriptsDatabase.getSection(name, true)
 	}
 
 	override findScriptNamesStartingWith(String namePart, ArrayList<String> outNames) {

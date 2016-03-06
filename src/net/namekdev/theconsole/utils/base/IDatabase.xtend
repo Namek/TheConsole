@@ -1,5 +1,7 @@
 package net.namekdev.theconsole.utils.base
 
+import com.eclipsesource.json.JsonObject
+
 interface IDatabase {
 	def void load(String path)
 	def void save()
@@ -9,6 +11,9 @@ interface IDatabase {
 
 
 	interface ISectionAccessor {
+		def JsonObject getRoot()
+		def void setRoot(JsonObject root)
+
 		def boolean has(String key)
 		def String get(String key)
 		def String get(String key, boolean emptyStringIfDoesntExist)

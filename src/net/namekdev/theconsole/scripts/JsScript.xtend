@@ -1,6 +1,7 @@
 package net.namekdev.theconsole.scripts
 
 import net.namekdev.theconsole.scripts.api.IScript
+import net.namekdev.theconsole.scripts.api.IScriptManager
 
 /**
  * This class doesn't have any intelligence since it's totally managed/modified by {@link JsScriptManager}.
@@ -9,13 +10,13 @@ import net.namekdev.theconsole.scripts.api.IScript
  * @see JsScriptManager
  */
 public class JsScript implements IScript {
-	JsScriptManager manager
+	IScriptManager manager
 	package String name
 	package var String code
 	Context context
 
 
-	new(JsScriptManager manager, String name, String code) {
+	new(IScriptManager manager, String name, String code) {
 		this.manager = manager
 		this.name = name
 		this.code = code

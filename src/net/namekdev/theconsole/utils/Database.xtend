@@ -97,11 +97,19 @@ class Database implements IDatabase {
 
 	static class SectionAccessor implements ISectionAccessor {
 		val Database database
-		public val JsonObject root
+		var JsonObject root
 
 		new(Database database, JsonObject tree) {
 			this.database = database
 			this.root = tree
+		}
+
+		override getRoot() {
+			return root
+		}
+
+		override setRoot(JsonObject root) {
+			this.root = root
 		}
 
 		override has(String key) {
