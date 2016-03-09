@@ -9,12 +9,13 @@ import java.net.HttpURLConnection
 import java.net.URI
 import java.net.URL
 import jdk.nashorn.internal.objects.NativeArray
+import net.namekdev.theconsole.utils.AudioFilePlayer
 import net.namekdev.theconsole.utils.api.IAudioFilePlayer
 
 class JsUtilsProvider {
 	private var PrintWriter errorStream
 
-	public final IAudioFilePlayer audioFilePlayer = null //TODO
+	public final IAudioFilePlayer audioFilePlayer = new AudioFilePlayer
 
 
 	new(PrintWriter errorStream) {
