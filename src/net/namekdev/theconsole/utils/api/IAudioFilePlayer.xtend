@@ -1,4 +1,4 @@
-package net.namekdev.theconsole.utils
+package net.namekdev.theconsole.utils.api
 
 interface IAudioFilePlayer {
 	def void playSync(String filePath)

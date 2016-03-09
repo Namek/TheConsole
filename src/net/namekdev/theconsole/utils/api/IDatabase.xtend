@@ -1,4 +1,4 @@
-package net.namekdev.theconsole.utils.base
+package net.namekdev.theconsole.utils.api
 
 import com.eclipsesource.json.JsonObject
 

@@ -1,15 +1,15 @@
 package net.namekdev.theconsole.scripts.execution
 
-import java.net.HttpURLConnection
-import java.net.URL
-import java.net.URI
-import java.io.PrintWriter
 import java.awt.Desktop
+import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
-import java.io.BufferedReader
-import net.namekdev.theconsole.utils.IAudioFilePlayer
+import java.io.PrintWriter
+import java.net.HttpURLConnection
+import java.net.URI
+import java.net.URL
 import jdk.nashorn.internal.objects.NativeArray
+import net.namekdev.theconsole.utils.api.IAudioFilePlayer
 
 class JsUtilsProvider {
 	private var PrintWriter errorStream
