@@ -11,7 +11,7 @@ import javafx.scene.layout.Pane
 import net.namekdev.theconsole.view.api.IConsoleOutput
 import net.namekdev.theconsole.view.api.IConsolePromptInput
 
-class ConsoleWindow extends AnchorPane {
+class ConsoleView extends AnchorPane {
 	@FXML public Pane outputPane
 	@FXML public TextField promptInput
 
@@ -21,12 +21,12 @@ class ConsoleWindow extends AnchorPane {
 
 
 	public new() {
-		val loader = new FXMLLoader(getClass().getResource("ConsoleWindow.fxml"))
+		val loader = new FXMLLoader(getClass().getResource("ConsoleView.fxml"))
 		loader.setRoot(this)
 		loader.setController(this)
 		loader.load()
 
-		getStylesheets().add(getClass().getResource("ConsoleWindow.css").toExternalForm())
+		getStylesheets().add(getClass().getResource("ConsoleView.css").toExternalForm())
 
 		consoleOutput = new ConsoleOutput(outputPane)
 

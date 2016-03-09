@@ -13,9 +13,6 @@ interface IWindowController {
 	def int getWidth()
 	def int getHeight()
 
-	def int getScreenWidth()
-	def int getScreenHeight()
-
-	def short getOpacity()
-	def void setOpacity(short opacity)
+	def float getOpacity()
+	def void setOpacity(float opacity)
 }

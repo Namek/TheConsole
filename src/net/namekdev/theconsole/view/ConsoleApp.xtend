@@ -1,5 +1,8 @@
 package net.namekdev.theconsole.view
 
+import java.io.IOException
+import java.io.OutputStream
+import java.io.PrintWriter
 import java.util.logging.Level
 import java.util.logging.Logger
 import javafx.scene.Scene
@@ -12,6 +15,7 @@ import net.namekdev.theconsole.scripts.JsScriptManager
 import net.namekdev.theconsole.scripts.api.IScriptManager
 import net.namekdev.theconsole.scripts.execution.JsUtilsProvider
 import net.namekdev.theconsole.scripts.internal.AliasScript
+import net.namekdev.theconsole.scripts.internal.ExecScript
 import net.namekdev.theconsole.utils.Database
 import net.namekdev.theconsole.utils.PathUtils
 import net.namekdev.theconsole.utils.base.IDatabase
@@ -19,14 +23,10 @@ import org.jnativehook.GlobalScreen
 import org.jnativehook.NativeInputEvent
 import org.jnativehook.keyboard.NativeKeyEvent
 import org.jnativehook.keyboard.NativeKeyListener
-import net.namekdev.theconsole.scripts.internal.ExecScript
-import java.io.PrintWriter
-import java.io.OutputStream
-import java.io.IOException
 
 class ConsoleApp implements NativeKeyListener {
 	JFrame hostWindow
-	ConsoleWindow consoleWindow
+	ConsoleView consoleView
 	IDatabase database
 	JsUtilsProvider jsUtils
 	IScriptManager scriptManager
@@ -34,13 +34,14 @@ class ConsoleApp implements NativeKeyListener {
 
 
 	new() {
-		consoleWindow = new ConsoleWindow()
-		hostWindow = new UndecoratedUtilityWindow(new Scene(consoleWindow))
-		hostWindow.opacity = 0.85f
+		consoleView = new ConsoleView()
+		hostWindow = new UndecoratedUtilityWindow(new Scene(consoleView))
 
-		val consolePrompt = consoleWindow.consolePromptInput
-		val consoleOutput = consoleWindow.consoleOutput
-		val windowController = null
+		val windowController = new ConsoleAppWindowController(hostWindow)
+		windowController.setOpacity(0.85f)
+
+		val consolePrompt = consoleView.consolePromptInput
+		val consoleOutput = consoleView.consoleOutput
 		val consoleProxy = new ConsoleProxy(consoleOutput, windowController)
 
 		val errorStream = new PrintWriter(new OutputStream() {
