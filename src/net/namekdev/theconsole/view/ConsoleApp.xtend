@@ -19,6 +19,10 @@ import org.jnativehook.GlobalScreen
 import org.jnativehook.NativeInputEvent
 import org.jnativehook.keyboard.NativeKeyEvent
 import org.jnativehook.keyboard.NativeKeyListener
+import net.namekdev.theconsole.scripts.internal.ExecScript
+import java.io.PrintWriter
+import java.io.OutputStream
+import java.io.IOException
 
 class ConsoleApp implements NativeKeyListener {
 	JFrame hostWindow
@@ -39,6 +43,20 @@ class ConsoleApp implements NativeKeyListener {
 		val windowController = null
 		val consoleProxy = new ConsoleProxy(consoleOutput, windowController)
 
+		val errorStream = new PrintWriter(new OutputStream() {
+			StringBuilder sb = new StringBuilder();
+
+			override write(int c) throws IOException {
+				if (c == '\n') {
+					consoleOutput.addErrorEntry(sb.toString())
+					sb = new StringBuilder()
+				}
+				else {
+					sb.append(c as char)
+				}
+			}
+		})
+
 		database = new Database
 		try {
 			database.load(PathUtils.appSettingsDir + "/settings.db")
@@ -46,7 +64,7 @@ class ConsoleApp implements NativeKeyListener {
 		catch (RuntimeException exc) {
 			consoleProxy.error(exc.message)
 		}
-		jsUtils = new JsUtilsProvider(null /* TODO */)
+		jsUtils = new JsUtilsProvider(errorStream)
 		scriptManager = new JsScriptManager(jsUtils, database, consoleProxy)
 
 		val aliasStorage = database.aliasesSection
@@ -55,6 +73,7 @@ class ConsoleApp implements NativeKeyListener {
 		new CommandLineService(consolePrompt, consoleOutput, scriptManager, aliasManager)
 
 		scriptManager.put("alias", new AliasScript(aliasManager, aliasStorage, jsUtils, consoleProxy))
+		scriptManager.put("exec", new ExecScript(jsUtils))
 
 		val nativeHookLogger = Logger.getLogger(typeof(GlobalScreen).getPackage().getName())
 		nativeHookLogger.setLevel(Level.WARNING)
