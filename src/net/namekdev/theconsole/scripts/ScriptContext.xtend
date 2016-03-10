@@ -5,7 +5,7 @@ import net.namekdev.theconsole.utils.base.IDatabase.ISectionAccessor
 /**
  * Variables available for executed script.
  */
-class JsScriptContext {
+class ScriptContext {
 	public val ISectionAccessor Storage
 
 

@@ -11,7 +11,7 @@ import net.namekdev.theconsole.commands.AliasManager
 import net.namekdev.theconsole.commands.CommandLineService
 import net.namekdev.theconsole.commands.api.IAliasManager
 import net.namekdev.theconsole.scripts.ConsoleProxy
-import net.namekdev.theconsole.scripts.JsScriptManager
+import net.namekdev.theconsole.scripts.ScriptManager
 import net.namekdev.theconsole.scripts.api.IScriptManager
 import net.namekdev.theconsole.scripts.execution.JsUtilsProvider
 import net.namekdev.theconsole.scripts.internal.AliasScript
@@ -66,7 +66,7 @@ class ConsoleApp implements NativeKeyListener {
 			consoleProxy.error(exc.message)
 		}
 		jsUtils = new JsUtilsProvider(errorStream)
-		scriptManager = new JsScriptManager(jsUtils, database, consoleProxy)
+		scriptManager = new ScriptManager(jsUtils, database, consoleProxy)
 
 		val aliasStorage = database.aliasesSection
 		aliasManager = new AliasManager(aliasStorage)

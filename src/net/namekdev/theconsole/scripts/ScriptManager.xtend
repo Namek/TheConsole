@@ -28,7 +28,7 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY
 
-class JsScriptManager implements IScriptManager {
+class ScriptManager implements IScriptManager {
 	final String SCRIPT_FILE_EXTENSION = "js"
 
 	val Map<String, IScript> scripts = new TreeMap<String, IScript>()
@@ -196,12 +196,12 @@ class JsScriptManager implements IScriptManager {
 
 			if (script == null) {
 				console.log("Loading script: " + scriptName)
-				script = new JsScript(this, scriptName, code)
+				script = new Script(this, scriptName, code)
 				put(scriptName, script)
 			}
-			else if (script instanceof JsScript) {
+			else if (script instanceof Script) {
 				console.log("Reloading script: " + scriptName)
-				(script as JsScript).code = code
+				(script as Script).code = code
 			}
 			else {
 				console.error("Cannot overwrite core script: " + scriptName)

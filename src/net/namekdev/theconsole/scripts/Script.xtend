@@ -9,11 +9,11 @@ import net.namekdev.theconsole.scripts.api.IScriptManager
  * @author Namek
  * @see JsScriptManager
  */
-public class JsScript implements IScript {
+public class Script implements IScript {
 	IScriptManager manager
 	package String name
 	package var String code
-	val JsScriptContext context
+	val ScriptContext context
 
 
 	new(IScriptManager manager, String name, String code) {
@@ -21,7 +21,7 @@ public class JsScript implements IScript {
 		this.name = name
 		this.code = code
 
-		context = new JsScriptContext(manager.createScriptStorage(name))
+		context = new ScriptContext(manager.createScriptStorage(name))
 	}
 
 	override run(String[] args) {
