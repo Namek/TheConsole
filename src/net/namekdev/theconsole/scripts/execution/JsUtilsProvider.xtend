@@ -9,6 +9,7 @@ import java.net.HttpURLConnection
 import java.net.URI
 import java.net.URL
 import jdk.nashorn.internal.objects.NativeArray
+import net.namekdev.theconsole.state.ConsoleContext
 import net.namekdev.theconsole.utils.AudioFilePlayer
 import net.namekdev.theconsole.utils.api.IAudioFilePlayer
 
@@ -18,8 +19,8 @@ class JsUtilsProvider {
 	public final IAudioFilePlayer audioFilePlayer = new AudioFilePlayer
 
 
-	new(PrintWriter errorStream) {
-		this.errorStream = errorStream
+	new(ConsoleContext consoleContext) {
+		this.errorStream = consoleContext.errorStream
 	}
 
 	/**

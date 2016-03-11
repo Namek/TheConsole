@@ -1,7 +1,7 @@
 package net.namekdev.theconsole.scripts.api
 
 import java.util.ArrayList
-import net.namekdev.theconsole.utils.base.IDatabase.ISectionAccessor
+import net.namekdev.theconsole.utils.api.IDatabase.ISectionAccessor
 
 interface IScriptManager {
 	def IScript get(String name)
@@ -20,12 +20,12 @@ interface IScriptManager {
 	/**
 	 * Run JavaScript code in new scope within given context.
 	 */
-	def Object runUnscopedJs(String code)
+//	def Object runUnscopedJs(String code)
 
 	/**
 	 * Run JavaScript code without creating any scope and getting any additional context.
 	 */
-	def Object runJs(String code, Object[] args, Object context)
+//	def Object runJs(String code, Object[] args, Object context)
 
 	def int getScriptCount()
 

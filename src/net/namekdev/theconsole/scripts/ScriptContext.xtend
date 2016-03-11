@@ -1,6 +1,6 @@
 package net.namekdev.theconsole.scripts
 
-import net.namekdev.theconsole.utils.base.IDatabase.ISectionAccessor
+import net.namekdev.theconsole.utils.api.IDatabase.ISectionAccessor
 
 /**
  * Variables available for executed script.

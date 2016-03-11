@@ -1,0 +1,9 @@
+#prompt-input {
+	-fx-background-color: black;
+	-fx-text-fill: white;
+	-fx-font-family: Consolas;
+	-fx-font-size: 16;
+
+	-fx-border-color: rgba(240, 20, 0, 0.5);
+	-fx-border-width: 3;
+}

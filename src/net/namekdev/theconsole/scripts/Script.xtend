@@ -2,6 +2,7 @@ package net.namekdev.theconsole.scripts
 
 import net.namekdev.theconsole.scripts.api.IScript
 import net.namekdev.theconsole.scripts.api.IScriptManager
+import net.namekdev.theconsole.state.api.IConsoleContext
 
 /**
  * This class doesn't have any intelligence since it's totally managed/modified by {@link JsScriptManager}.
@@ -24,7 +25,7 @@ public class Script implements IScript {
 		context = new ScriptContext(manager.createScriptStorage(name))
 	}
 
-	override run(String[] args) {
-		return manager.runJs(this.code, args, context)
+	override run(IConsoleContext executionContext, String[] args) {
+		return executionContext.runJs(this.code, args, context)
 	}
 }

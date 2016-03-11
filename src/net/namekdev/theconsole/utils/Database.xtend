@@ -4,8 +4,8 @@ import java.io.FileWriter
 import java.io.IOException
 import java.io.File
 import java.io.FileReader
-import net.namekdev.theconsole.utils.base.IDatabase.ISectionAccessor
-import net.namekdev.theconsole.utils.base.IDatabase
+import net.namekdev.theconsole.utils.api.IDatabase.ISectionAccessor
+import net.namekdev.theconsole.utils.api.IDatabase
 import com.eclipsesource.json.Json
 import com.eclipsesource.json.JsonValue
 import com.eclipsesource.json.JsonObject

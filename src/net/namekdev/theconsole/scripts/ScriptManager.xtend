@@ -13,15 +13,13 @@ import java.util.ArrayList
 import java.util.Map
 import java.util.Queue
 import java.util.TreeMap
-import java.util.function.BiConsumer
 import net.namekdev.theconsole.scripts.api.IScript
 import net.namekdev.theconsole.scripts.api.IScriptManager
-import net.namekdev.theconsole.scripts.execution.JavaScriptExecutor
-import net.namekdev.theconsole.scripts.execution.JsUtilsProvider
+import net.namekdev.theconsole.state.api.IConsoleContextProvider
 import net.namekdev.theconsole.utils.PathUtils
 import net.namekdev.theconsole.utils.RecursiveWatcher
 import net.namekdev.theconsole.utils.RecursiveWatcher.FileChangeEvent
-import net.namekdev.theconsole.utils.base.IDatabase
+import net.namekdev.theconsole.utils.api.IDatabase
 
 import static java.nio.file.FileVisitResult.CONTINUE
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE
@@ -34,31 +32,26 @@ class ScriptManager implements IScriptManager {
 	val Map<String, IScript> scripts = new TreeMap<String, IScript>()
 	val scriptNames = new ArrayList<String>()
 
-	JavaScriptExecutor jsEnv
-	JsUtilsProvider jsUtils
 	IDatabase settingsDatabase
 	IDatabase.ISectionAccessor scriptsDatabase
-	ConsoleProxy console
+	IConsoleContextProvider consoleContextProvider
 
 	final Path scriptsWatchDir = PathUtils.scriptsDir
 	private PathMatcher scriptExtensionMatcher
 
-	val tempArgs = new TemporaryArgs
 
 
-	new(JsUtilsProvider jsUtils, IDatabase database, ConsoleProxy console) {
-		this.jsUtils = jsUtils
+	new(IDatabase database, IConsoleContextProvider consoleContextProvider) {
 		this.settingsDatabase = database
 		this.scriptsDatabase = settingsDatabase.getScriptsSection()
-		this.console = console
-		createJsEnvironment()
+		this.consoleContextProvider = consoleContextProvider
 
 		val fs = FileSystems.getDefault()
 		scriptExtensionMatcher = fs.getPathMatcher("glob:**/*." + SCRIPT_FILE_EXTENSION)
 
 		if (!Files.isDirectory(scriptsWatchDir)) {
 			val path = scriptsWatchDir.toAbsolutePath().toString()
-			console.log("No scripts folder found, creating a new one: " + path)
+			defaultContextConsole.log("No scripts folder found, creating a new one: " + path)
 			new File(path).mkdirs()
 		}
 
@@ -71,27 +64,12 @@ class ScriptManager implements IScriptManager {
 			watcher.start()
 		}
 		catch (IOException exc) {
-			console.error(exc.toString())
+			defaultContextConsole.error(exc.toString())
 		}
 	}
 
-	def private void createJsEnvironment() {
-		jsEnv = new JavaScriptExecutor()
-		jsEnv.bindObject("Utils", jsUtils)
-		jsEnv.bindObject("TemporaryArgs", tempArgs)
-		jsEnv.bindObject("console", console)
-
-		jsEnv.bindObject("assert", new BiConsumer<Boolean, String> {
-			override accept(Boolean condition, String error) {
-				jsUtils.assertError(condition, error)
-			}
-		})
-
-		jsEnv.bindObject("assertInfo", new BiConsumer<Boolean, String> {
-			override accept(Boolean condition, String text) {
-				jsUtils.assertInfo(condition, text)
-			}
-		})
+	def private ConsoleProxy getDefaultContextConsole() {
+		return consoleContextProvider.contextOfDefaultTab.proxy
 	}
 
 	override get(String name) {
@@ -120,17 +98,6 @@ class ScriptManager implements IScriptManager {
 		return scriptNames
 	}
 
-	override runUnscopedJs(String code) {
-		return jsEnv.eval(code)
-	}
-
-	override Object runJs(String code, Object[] args, Object context) {
-		tempArgs.args = args
-		tempArgs.context = context
-
-		return runUnscopedJs("(function(args, Storage) {" + code + "})(Java.from(TemporaryArgs.args), TemporaryArgs.context.Storage)")
-	}
-
 	override createScriptStorage(String name) {
 		return scriptsDatabase.getSection(name, true)
 	}
@@ -149,6 +116,7 @@ class ScriptManager implements IScriptManager {
 
 	def private int analyzeScriptsFolder(Path folder) {
 		var diff = 0 as int
+		val console = defaultContextConsole
 
 		try {
 			console.log("Analyzing folder structure for ." + SCRIPT_FILE_EXTENSION + " files: " + folder)
@@ -186,6 +154,7 @@ class ScriptManager implements IScriptManager {
 		}
 
 		val scriptName = pathToScriptName(path)
+		val console = defaultContextConsole
 
 		try {
 			var code = new String(Files.readAllBytes(path), StandardCharsets.UTF_8)
@@ -246,8 +215,4 @@ class ScriptManager implements IScriptManager {
 	}
 
 
-	static class TemporaryArgs {
-		public Object[] args
-		public Object context
-	}
 }

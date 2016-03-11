@@ -1,11 +1,10 @@
-package net.namekdev.theconsole.view
+package net.namekdev.theconsole.view.components
 
 import java.util.ArrayList
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.function.BiConsumer
 import javafx.concurrent.Worker
-import javafx.scene.layout.Pane
 import javafx.scene.web.WebEngine
 import javafx.scene.web.WebView
 import net.namekdev.theconsole.view.api.IConsoleOutput
@@ -14,14 +13,15 @@ import org.w3c.dom.Element
 import org.w3c.dom.Text
 
 class ConsoleOutput implements IConsoleOutput {
-	WebView web = new WebView
+	WebView web
 	WebEngine engine
 
 	val BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>
 	val entries = new ArrayList<ConsoleOutputEntry>(1024)
 
 
-	new(Pane parent) {
+	new(WebView webView) {
+		this.web = webView
 		engine = web.engine
 		engine.userStyleSheetLocation = getClass().getResource("ConsoleOutput_WebView.css").toString
 		engine.loadWorker.stateProperty.addListener([ observableValue, state, newState |
@@ -33,12 +33,7 @@ class ConsoleOutput implements IConsoleOutput {
 		])
 		engine.loadContent("<html><head></head><body></body></html>")
 
-		web.prefWidthProperty().bind(parent.widthProperty())
-		web.maxHeightProperty().bind(parent.heightProperty())
 		web.focusTraversable = false
-
-		// seems evil, but what choice do we have?
-		parent.children.add(web)
 	}
 
 	def private boolean isWebLoaded() {

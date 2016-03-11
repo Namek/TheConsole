@@ -1,11 +1,11 @@
 package net.namekdev.theconsole.commands
 
-import net.namekdev.theconsole.commands.api.IAliasManager
 import java.util.ArrayList
+import java.util.List
 import java.util.Map
 import java.util.TreeMap
-import net.namekdev.theconsole.utils.base.IDatabase.ISectionAccessor
-import java.util.List
+import net.namekdev.theconsole.commands.api.IAliasManager
+import net.namekdev.theconsole.utils.api.IDatabase.ISectionAccessor
 
 class AliasManager implements IAliasManager {
 	private var Map<String, String> aliases = new TreeMap<String, String>()

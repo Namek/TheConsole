@@ -9,28 +9,33 @@ import net.namekdev.theconsole.commands.api.IAliasManager
 import net.namekdev.theconsole.scripts.api.IScript
 import net.namekdev.theconsole.scripts.api.IScriptManager
 import net.namekdev.theconsole.scripts.execution.ScriptAssertError
+import net.namekdev.theconsole.state.api.IConsoleContext
 import net.namekdev.theconsole.view.api.IConsoleOutput
 import net.namekdev.theconsole.view.api.IConsoleOutputEntry
 import net.namekdev.theconsole.view.api.IConsolePromptInput
 
 class CommandLineService {
-	IConsolePromptInput consolePrompt
-	IConsoleOutput consoleOutput
-	IScriptManager scriptManager
-	IAliasManager aliasManager
+	val IConsoleContext consoleContext;
+	val IConsolePromptInput consolePrompt
+	val IConsoleOutput consoleOutput
+	val IScriptManager scriptManager
+	val IAliasManager aliasManager
+	val CommandHistory history
 
-	CommandHistory history
 
-
-	new(IConsolePromptInput consolePrompt, IConsoleOutput consoleOutput, IScriptManager scriptManager, IAliasManager aliasManager) {
-		this.consolePrompt = consolePrompt
-		this.consoleOutput = consoleOutput
+	new(IConsoleContext consoleContext, IScriptManager scriptManager, IAliasManager aliasManager) {
+		this.consoleContext = consoleContext
+		this.consolePrompt = consoleContext.input
+		this.consoleOutput = consoleContext.output
 		this.scriptManager = scriptManager
 		this.aliasManager = aliasManager
-
-		history = new CommandHistory()
+		this.history = new CommandHistory()
 
 		consolePrompt.keyPressHandler = promptKeyPressHandler
+	}
+
+	def void dispose() {
+		consolePrompt.keyPressHandler = null
 	}
 
 
@@ -272,7 +277,7 @@ class CommandLineService {
 
 					var result = null as Object
 					try {
-						result = script.run(args)
+						result = script.run(consoleContext, args)
 					}
 					catch (ScriptAssertError assertion) {
 						if (assertion.isError) {
@@ -312,7 +317,7 @@ class CommandLineService {
 
 			if (runAsJavaScript) {
 				// script was not found, so try to execute it as pure JavaScript!
-				val result = scriptManager.runUnscopedJs(fullCommand) as Object
+				val result = consoleContext.runUnscopedJs(fullCommand) as Object
 
 				if (result instanceof Exception) {
 					consoleOutput.addErrorEntry(result.toString())

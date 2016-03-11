@@ -1,19 +1,15 @@
 package net.namekdev.theconsole.scripts.internal
 
-import net.namekdev.theconsole.scripts.api.IScript
-import net.namekdev.theconsole.commands.api.IAliasManager
-import net.namekdev.theconsole.scripts.execution.JsUtilsProvider
-import net.namekdev.theconsole.scripts.ConsoleProxy
-import net.namekdev.theconsole.utils.base.IDatabase.ISectionAccessor
-import java.util.List
-import java.util.ArrayList
 import com.eclipsesource.json.Json
+import java.util.ArrayList
+import net.namekdev.theconsole.commands.api.IAliasManager
+import net.namekdev.theconsole.scripts.api.IScript
+import net.namekdev.theconsole.state.api.IConsoleContext
+import net.namekdev.theconsole.utils.api.IDatabase.ISectionAccessor
 
 class AliasScript implements IScript {
 	protected IAliasManager aliasManager
 	protected ISectionAccessor storage
-	protected JsUtilsProvider utils
-	protected ConsoleProxy console
 
 	private ArrayList<String> tmpArray = new ArrayList<String>()
 
@@ -23,14 +19,15 @@ class AliasScript implements IScript {
  - alias <alias> <command> [param, [param, [...]]]'
 
 
-	new(IAliasManager aliasManager, ISectionAccessor storage, JsUtilsProvider utils, ConsoleProxy console) {
+	new(IAliasManager aliasManager, ISectionAccessor storage) {
 		this.aliasManager = aliasManager
 		this.storage = storage
-		this.utils = utils
-		this.console = console
 	}
 
-	override Object run(String[] args) {
+	override Object run(IConsoleContext executionContext, String[] args) {
+		val utils = executionContext.jsUtils
+		val console = executionContext.proxy
+
 		utils.assertInfo(args.length != 0, USAGE_INFO)
 
 		var aliases = storage.root.asObject
