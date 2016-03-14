@@ -11,6 +11,9 @@ import javafx.scene.layout.AnchorPane
 import net.namekdev.theconsole.state.ConsoleContext
 import net.namekdev.theconsole.state.api.IConsoleContextManager
 import javafx.application.Platform
+import javafx.scene.input.InputEvent
+import javafx.scene.input.KeyEvent
+import javafx.scene.input.KeyCode
 
 class ConsoleView extends AnchorPane {
 	IConsoleContextManager consoleContextManager
@@ -31,6 +34,8 @@ class ConsoleView extends AnchorPane {
 		getStylesheets().add(getClass().getResource("ConsoleView.css").toExternalForm())
 
 		tabPane.getSelectionModel().selectedItemProperty.addListener(onSwitchTabHandler)
+
+		addEventHandler(KeyEvent.KEY_PRESSED, onKeyPressHandler)
 	}
 
 	def createTab() {
@@ -43,6 +48,12 @@ class ConsoleView extends AnchorPane {
 		tabPane.tabs.add(tab)
 
 		return tab
+	}
+
+	def closeCurrentTab() {
+		val tab = tabPane.selectionModel.selectedItem as ConsoleTab
+		consoleContextManager.destroyContext(tab.context)
+		tabPane.tabs.remove(tab)
 	}
 
 	def void onClosingTab(ConsoleContext ctx) {
@@ -59,5 +70,13 @@ class ConsoleView extends AnchorPane {
 	val EventHandler<Event> onTabCloseRequestHandler = [evt|
 		val tab = evt.source as ConsoleTab
 		consoleContextManager.destroyContext(tab.context)
+	]
+
+	val EventHandler<KeyEvent> onKeyPressHandler = [evt|
+		if (evt.controlDown && evt.code == KeyCode.W) {
+			if (tabPane.tabs.length > 1) {
+				closeCurrentTab()
+			}
+		}
 	]
 }
