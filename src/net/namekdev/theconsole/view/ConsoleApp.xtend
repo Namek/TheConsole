@@ -24,9 +24,7 @@ class ConsoleApp implements NativeKeyListener {
 		val windowController = new ConsoleAppWindowController(hostWindow)
 		appStateManager = new AppStateManager(windowController)
 		consoleView.init(appStateManager)
-
 		consoleView.createTab()
-		consoleView.createTab()//TODO remove it when tab management will be done
 
 
 		// TODO to be removed in the future when default settings will be available

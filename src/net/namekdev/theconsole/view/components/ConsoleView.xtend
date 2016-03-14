@@ -78,5 +78,10 @@ class ConsoleView extends AnchorPane {
 				closeCurrentTab()
 			}
 		}
+
+		if (evt.controlDown && evt.code == KeyCode.T) {
+			val newTab = createTab()
+			tabPane.selectionModel.select(newTab)
+		}
 	]
 }
