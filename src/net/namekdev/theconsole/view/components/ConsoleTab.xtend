@@ -12,7 +12,7 @@ import javafx.scene.web.WebView
 import net.namekdev.theconsole.state.api.IConsoleContext
 import net.namekdev.theconsole.view.api.IConsolePromptInput
 
-class ConsoleTab extends Tab {
+class ConsoleTab extends RenamableTab {
 	package var IConsoleContext context
 	public val ConsoleOutput consoleOutput
 
@@ -24,11 +24,9 @@ class ConsoleTab extends Tab {
 
 
 	new() {
-		super("Default")
 		val tabLoader = new FXMLLoader(getClass().getResource("ConsoleTab.fxml"))
-		tabLoader.root = this
 		tabLoader.controller = this
-		tabLoader.load()
+		this.content = tabLoader.load()
 
 		pane.getStylesheets().add(getClass().getResource("ConsoleTab.css").toExternalForm())
 

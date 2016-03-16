@@ -16,7 +16,7 @@
     -fx-border-color: transparent;
 }
 
-.tab-pane .tab .tab-label {
+.tab-pane .tab .label {
     -fx-alignment: CENTER;
     -fx-text-fill: #eee;
     -fx-font-size: 12px;
@@ -33,12 +33,12 @@
     -fx-border-color: #666;
 }
 
-.tab-pane .tab:selected .tab-label {
+.tab-pane .tab:selected .label {
     -fx-text-fill: white;
 	-fx-font-weight: bold;
 }
 
-.tab-pane .tab:hover .tab-label {
+.tab-pane .tab:hover .label {
 	-fx-font-weight: bold;
 }
 
