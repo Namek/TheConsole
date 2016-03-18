@@ -68,6 +68,12 @@ class ConsoleView extends AnchorPane {
 	]
 
 	val EventHandler<Event> onTabCloseRequestHandler = [evt|
+		if (tabPane.tabs.size < 2) {
+			// don't close the last one!
+			evt.consume()
+			return
+		}
+
 		val tab = evt.source as ConsoleTab
 		consoleContextManager.destroyContext(tab.context)
 	]
