@@ -1,10 +1,16 @@
 package net.namekdev.theconsole.view
 
+import java.awt.EventQueue
+import java.awt.MouseInfo
+import java.awt.Robot
+import java.awt.event.InputEvent
 import javax.swing.JFrame
 import net.namekdev.theconsole.view.api.IWindowController
 
 package class ConsoleAppWindowController implements IWindowController {
 	val JFrame window
+	val robot = new Robot()
+
 
 	new(JFrame window) {
 		this.window = window
@@ -12,6 +18,29 @@ package class ConsoleAppWindowController implements IWindowController {
 
 	override setVisible(boolean visible) {
 		window.visible = visible
+
+		if (visible) {
+			// weird hack that enables to re-focus window.
+			// TODO: probably won't work properly on multi-screen env
+			EventQueue.invokeLater [
+				window.toFront()
+
+				try {
+					// remember the last location of mouse
+					val oldMouseLocation = MouseInfo.getPointerInfo().getLocation()
+
+					// simulate a mouse click on title bar of window
+					robot.mouseMove(window.getX() + 10, window.getY() + 5)
+					robot.mousePress(InputEvent.BUTTON1_DOWN_MASK)
+					robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK)
+
+					// move mouse to old location
+					robot.mouseMove(oldMouseLocation.getX() as int, oldMouseLocation.getY() as int)
+				}
+				catch (Exception ex) { }
+			]
+		}
+
 	}
 
 	override isVisible() {
