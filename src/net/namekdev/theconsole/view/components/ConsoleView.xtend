@@ -14,6 +14,7 @@ import javafx.application.Platform
 import javafx.scene.input.InputEvent
 import javafx.scene.input.KeyEvent
 import javafx.scene.input.KeyCode
+import java.util.regex.Pattern
 
 class ConsoleView extends AnchorPane {
 	IConsoleContextManager consoleContextManager
@@ -44,6 +45,20 @@ class ConsoleView extends AnchorPane {
 		tab.context = ctx
 
 		tab.onCloseRequest = onTabCloseRequestHandler
+
+		// determine name for new tab
+		{
+			val numberedTabRegex = Pattern.compile("tab\\s*(\\d+)")
+			val tabNumbers = tabPane.tabs
+				.map[(it as ConsoleTab).headerText]
+				.map[numberedTabRegex.matcher(it.toLowerCase)]
+				.filter[it.find() && it.groupCount == 1]
+				.map[it.group(1)].map[Integer.parseInt(it)]
+				.sort
+
+			val newTabNumber = if (tabNumbers.empty) 1 else tabNumbers.last + 1
+			tab.headerText = "Tab " + newTabNumber
+		}
 
 		tabPane.tabs.add(tab)
 
