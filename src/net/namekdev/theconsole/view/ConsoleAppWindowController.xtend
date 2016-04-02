@@ -30,7 +30,7 @@ package class ConsoleAppWindowController implements IWindowController {
 					val oldMouseLocation = MouseInfo.getPointerInfo().getLocation()
 
 					// simulate a mouse click on title bar of window
-					robot.mouseMove(window.getX() + 10, window.getY() + 5)
+					robot.mouseMove(window.getX() + 10, window.getY() + window.getHeight() - 10)
 					robot.mousePress(InputEvent.BUTTON1_DOWN_MASK)
 					robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK)
 
