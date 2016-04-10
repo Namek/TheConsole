@@ -130,6 +130,8 @@ class ConsoleOutput implements IConsoleOutput {
 				body.removeChild(entry.entryNode)
 				entry.dispose()
 			}
+
+			entries.clear()
 		]
 
 		if (!isWebLoaded) {
