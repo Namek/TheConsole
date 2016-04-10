@@ -1,3 +1,11 @@
-bin/
+# Xtend
 xtend-gen/
+
+# Maven
+target/
+
+# Eclipse
+.project
+.classpath
+.settings/
 

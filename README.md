@@ -89,3 +89,7 @@ When first argument of `assert`/`assertInfo` is not true, it stops whole scripts
     ```js
     assertInfo(args.length == 0, "Please, no args.")
     ```
+
+## Build
+
+Launch `mvn package` to get `target/theconsole-{version}.jar`.
