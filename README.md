@@ -4,7 +4,10 @@
 
 JavaScript-able Console. Made on top of Java 8 and JavaFX.
 
-Features:
+![The Console](https://namek.github.io/TheConsole2/screenshots/ss1.png)
+
+### Features:
+
 * custom scripts to be called as commands
 * command aliasing
 * auto-reloading of scripts when script file is modified
