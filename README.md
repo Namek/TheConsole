@@ -93,3 +93,11 @@ When first argument of `assert`/`assertInfo` is not true, it stops whole scripts
 ## Build
 
 Launch `mvn package` to get `target/theconsole-{version}.jar`.
+
+
+## Installation (for Windows)
+
+The Console doesn't need any real installation but you may find it useful to autostart the app with operating system.
+
+If so, simply download released (or built) `theconsole-{version}.jar` file and put it anywhere you like. Next, create a shortcut to this file, then move it into 
+`%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup`.
