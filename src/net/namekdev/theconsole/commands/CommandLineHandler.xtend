@@ -53,6 +53,8 @@ class CommandLineHandler implements ICommandLineHandler {
 				else {
 					// TODO try to complete command parameters
 				}
+
+				evt.consume()
 			}
 
 			case KeyCode.ENTER: {
