@@ -12,7 +12,8 @@ class Main {
 			new JFXPanel()
 
 			Platform.runLater [
-				new ConsoleApp()
+				val visible = args.exists[arg|arg.equals('-showOnStart')]
+				new ConsoleApp(visible)
 			]
 		]
 	}

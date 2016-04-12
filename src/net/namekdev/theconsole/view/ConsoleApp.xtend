@@ -18,7 +18,7 @@ class ConsoleApp implements NativeKeyListener {
 	val ConsoleView consoleView
 
 
-	new() {
+	new(boolean visible) {
 		consoleView = new ConsoleView
 		hostWindow = new UndecoratedUtilityWindow(new Scene(consoleView))
 		val windowController = new ConsoleAppWindowController(hostWindow)
@@ -29,7 +29,7 @@ class ConsoleApp implements NativeKeyListener {
 
 		// TODO to be removed in the future when default settings will be available
 		windowController.setOpacity(0.85f)
-		windowController.visible = true
+		windowController.visible = visible
 
 		val nativeHookLogger = Logger.getLogger(typeof(GlobalScreen).getPackage().getName())
 		nativeHookLogger.setLevel(Level.WARNING)
