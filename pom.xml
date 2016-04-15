@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.namekdev.theconsole</groupId>
 	<artifactId>theconsole</artifactId>
-	<version>0.1-SNAPSHOT</version>
+	<version>0.1</version>
 	<name>The Console</name>
 	<url>https://github.com/Namek/TheConsole2</url>
 	<properties>
