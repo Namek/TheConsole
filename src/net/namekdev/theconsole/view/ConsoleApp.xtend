@@ -16,12 +16,13 @@ class ConsoleApp implements NativeKeyListener {
 	val IConsoleContextManager appStateManager
 	val JFrame hostWindow
 	val ConsoleView consoleView
+	val ConsoleAppWindowController windowController
 
 
 	new(boolean visible) {
 		consoleView = new ConsoleView
 		hostWindow = new UndecoratedUtilityWindow(new Scene(consoleView))
-		val windowController = new ConsoleAppWindowController(hostWindow)
+		windowController = new ConsoleAppWindowController(hostWindow)
 		appStateManager = new AppStateManager(windowController)
 		consoleView.init(appStateManager)
 		consoleView.createTab()
@@ -41,9 +42,9 @@ class ConsoleApp implements NativeKeyListener {
 
 	override nativeKeyPressed(NativeKeyEvent evt) {
 		if (isConsoleToggleEvent(evt)) {
-			val show = !hostWindow.isVisible()
+			val show = !windowController.isVisible()
 
-			hostWindow.setVisible(show)
+			windowController.setVisible(show)
 			consumeEvent(evt)
 		}
 	}
