@@ -16,6 +16,29 @@ JavaScript-able Console. Made on top of Java 8 and JavaFX.
 * separated JSON configuration for every script
 * tabs
 
+
+## Getting started
+
+1. Latest released build can be found on [releases page](https://github.com/Namek/TheConsole/releases/).
+
+2. To toggle visibility of The Console hit ``CTRL + ` ``.
+
+3. The Console by itself can't do much besides running JavaScript. Just go into `%APPDATA/TheConsole/scripts` (create if doesn't exists) and create some `.js` files. Currently (which is a subject to change!) every single `.js` file is a command name, i.e. `currency.js` can be called using `currency` command.
+
+
+## Installation (for Windows)
+
+The Console doesn't need any real installation but you may find it useful to autostart the app with operating system.
+
+If so, simply download released (or built) `theconsole-{version}.jar` file and put it anywhere you like. Next, create a shortcut to this file, then move it into
+`%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup`.
+
+
+## Build from sources
+
+Launch `mvn package` to get `target/theconsole-{version}.jar`.
+
+
 ## APIs
 
 ### Nashorn (Java 8 extension)
@@ -52,7 +75,7 @@ Sources for globals:
 * `Utils` is placed in [JsUtilsProvider.xtend](src/net/namekdev/theconsole/scripts/execution/JsUtilsProvider.xtend)
 * `console` is [ConsoleProxy.xtend](src/net/namekdev/theconsole/scripts/ConsoleProxy.xtend)
 * whole file script is lanched by [ConsoleContext.xtend#runJs()](src/net/namekdev/theconsole/state/ConsoleContext.xtend)
-* Java->JavaScript bindings are made in [JavaScriptExecutor#ctor](src/net/namekdev/theconsole/scripts/execution/JavaScriptExecutor.xtend) 
+* Java->JavaScript bindings are made in [JavaScriptExecutor#ctor](src/net/namekdev/theconsole/scripts/execution/JavaScriptExecutor.xtend)
 [ConsoleContext.xtend#createJsEnvironment](src/net/namekdev/theconsole/state/ConsoleContext.xtend)
 
 ### Script Storage
@@ -92,15 +115,3 @@ When first argument of `assert`/`assertInfo` is not true, it stops whole scripts
     ```js
     assertInfo(args.length == 0, "Please, no args.")
     ```
-
-## Build
-
-Launch `mvn package` to get `target/theconsole-{version}.jar`.
-
-
-## Installation (for Windows)
-
-The Console doesn't need any real installation but you may find it useful to autostart the app with operating system.
-
-If so, simply download released (or built) `theconsole-{version}.jar` file and put it anywhere you like. Next, create a shortcut to this file, then move it into 
-`%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup`.
