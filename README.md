@@ -4,7 +4,7 @@
 
 JavaScript-able Console. Made on top of Java 8 and JavaFX.
 
-![The Console](https://namek.github.io/TheConsole2/screenshots/ss1.png)
+![The Console](https://namek.github.io/TheConsole/screenshots/ss1.png)
 
 ### Features:
 
