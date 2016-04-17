@@ -4,6 +4,7 @@ import java.util.ArrayList
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.function.BiConsumer
+import javafx.application.Platform
 import javafx.concurrent.Worker
 import javafx.scene.web.WebEngine
 import javafx.scene.web.WebView
@@ -16,6 +17,7 @@ class ConsoleOutput implements IConsoleOutput {
 	WebView web
 	WebEngine engine
 
+	var isWebEngineLoaded = false
 	val BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>
 	val entries = new ArrayList<ConsoleOutputEntry>(1024)
 
@@ -29,6 +31,7 @@ class ConsoleOutput implements IConsoleOutput {
 				while (!queue.empty) {
 					queue.poll.run()
 				}
+				isWebEngineLoaded = true
 			}
 		])
 		engine.loadContent("<html><head></head><body></body></html>")
@@ -37,7 +40,7 @@ class ConsoleOutput implements IConsoleOutput {
 	}
 
 	def private boolean isWebLoaded() {
-		return engine.loadWorker.state == Worker.State.SUCCEEDED
+		return isWebEngineLoaded
 	}
 
 	def boolean isScrolledToBottom() {
@@ -91,6 +94,9 @@ class ConsoleOutput implements IConsoleOutput {
 		if (!isWebLoaded) {
 			queue.put(task)
 		}
+		else if (!Platform.isFxApplicationThread) {
+			Platform.runLater [ task.run() ]
+		}
 		else {
 			task.run()
 		}
@@ -136,6 +142,9 @@ class ConsoleOutput implements IConsoleOutput {
 
 		if (!isWebLoaded) {
 			queue.put(task)
+		}
+		else if (!Platform.isFxApplicationThread) {
+			Platform.runLater [ task.run() ]
 		}
 		else {
 			task.run()
