@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.namekdev.theconsole</groupId>
 	<artifactId>theconsole</artifactId>
-	<version>0.1</version>
+	<version>0.2-SNAPSHOT</version>
 	<name>The Console</name>
 	<url>https://github.com/Namek/TheConsole2</url>
 	<properties>
@@ -22,7 +22,7 @@
 				</includes>
 			</resource>
 		</resources>
-	
+
 		<plugins>
 			<plugin>
 				<groupId>org.eclipse.xtend</groupId>
