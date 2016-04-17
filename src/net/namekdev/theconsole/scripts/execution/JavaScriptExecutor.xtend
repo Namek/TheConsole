@@ -7,6 +7,9 @@ import javax.script.ScriptContext
 import javax.script.Invocable
 import javax.script.ScriptEngine
 import javax.script.ScriptException
+import com.google.common.base.Charsets
+import com.google.common.io.Resources
+import net.namekdev.theconsole.utils.PathUtils
 
 class JavaScriptExecutor {
 	val ScriptEngineManager engineManager
@@ -33,6 +36,11 @@ class JavaScriptExecutor {
 		})
 
 		bindClass("System", typeof(System))
+
+		{
+			val scriptsDir = PathUtils.scriptsDir.toString().replace('\\', '/')
+			eval(Resources.toString(this.class.getResource("require.js"), Charsets.UTF_8) + '.localDir = "' + scriptsDir + '"')
+		}
 	}
 
 	def void bindClass(String variableName, Class<?> cls) {
