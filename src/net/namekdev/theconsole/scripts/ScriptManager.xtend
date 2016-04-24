@@ -21,13 +21,18 @@ import net.namekdev.theconsole.utils.RecursiveWatcher
 import net.namekdev.theconsole.utils.RecursiveWatcher.FileChangeEvent
 import net.namekdev.theconsole.utils.api.IDatabase
 
-import static java.nio.file.FileVisitResult.CONTINUE
+import static java.nio.file.FileVisitResult.*
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY
+import java.nio.file.FileVisitResult
+import java.nio.file.Paths
+import java.util.List
 
 class ScriptManager implements IScriptManager {
 	final String SCRIPT_FILE_EXTENSION = "js"
+	final String PACKAGE_JSON = "package.json"
+	final String INDEX_JS = "index.js"
 
 	val Map<String, IScript> scripts = new TreeMap<String, IScript>()
 	val scriptNames = new ArrayList<String>()
@@ -114,38 +119,49 @@ class ScriptManager implements IScriptManager {
 		}
 	}
 
-	def private int analyzeScriptsFolder(Path folder) {
-		var diff = 0 as int
+	def private void analyzeScriptsFolder(Path folder) {
 		val console = defaultContextConsole
+		val List<Path> modules = new ArrayList
+		val List<Path> scripts = new ArrayList
 
-		try {
-			console.log("Analyzing folder structure for ." + SCRIPT_FILE_EXTENSION + " files: " + folder)
+		Files.walkFileTree(folder, new SimpleFileVisitor<Path>() {
+			override FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+				val packageJson = Paths.get(dir.toString, PACKAGE_JSON)
+				val indexJs = Paths.get(dir.toString, INDEX_JS)
 
-			val scriptsCount = scriptNames.size
+				if (Files.exists(packageJson) || Files.exists(indexJs)) {
+					modules.add(dir)
 
-			Files.walkFileTree(folder, new SimpleFileVisitor<Path>() {
-			    override visitFile(Path file, BasicFileAttributes attr) {
-					if (!attr.isRegularFile()) {
-						return CONTINUE
-					}
+					return SKIP_SUBTREE
+				}
 
-					tryReadScriptFile(file)
+				return CONTINUE
+			}
 
+			override visitFile(Path file, BasicFileAttributes attr) {
+				if (!attr.isRegularFile()) {
 					return CONTINUE
 				}
-			})
 
-			diff = scriptNames.size - scriptsCount
+				scripts.add(file)
 
-			if (diff == 0) {
-				console.log("No scripts were loaded.")
+				return CONTINUE
 			}
-		}
-		catch (IOException exc) {
-			console.error(exc.toString())
-		}
 
-		return diff
+			override FileVisitResult postVisitDirectory(Path dir, IOException exc) {
+				return CONTINUE
+			}
+		})
+
+		// initialize modules first, later normal scripts
+
+		modules.forEach [modulePath |
+			tryLoadModule(modulePath)
+		]
+
+		scripts.forEach [scriptPath |
+			tryReadScriptFile(scriptPath)
+		]
 	}
 
 	def private void tryReadScriptFile(Path path) {
@@ -181,6 +197,21 @@ class ScriptManager implements IScriptManager {
 		}
 	}
 
+	def private void tryLoadModule(Path dir) {
+		val console = defaultContextConsole
+
+		if (Files.exists(Paths.get(dir.toString, PACKAGE_JSON))) {
+
+		}
+		else if (Files.exists(Paths.get(dir.toString, INDEX_JS))) {
+
+		}
+		else {
+			console.error("Couldn't find a module in: " + dir)
+		}
+	}
+
+
 	def private void removeScriptByPath(Path path) {
 		val scriptName = pathToScriptName(path)
 		remove(scriptName)
@@ -198,6 +229,9 @@ class ScriptManager implements IScriptManager {
 
 	val scriptsFileWatcher = new RecursiveWatcher.WatchListener {
 		override onWatchEvents(Queue<FileChangeEvent> events) {
+			// TODO check if containing folder is a module
+			// (need to go by path up to `scripts` root)
+
 			for (FileChangeEvent evt : events) {
 				val fullPath = evt.parentFolderPath.resolve(evt.relativePath)
 

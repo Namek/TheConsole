@@ -90,7 +90,7 @@ class ConsoleContext implements IConsoleContext {
 	}
 
 	/**
-	 * Run JavaScript code without creating any scope and getting any additional context.
+	 * Run JavaScript code in new scope within given context.
 	 */
 	override runJs(String code, Object[] args, Object context) {
 		tempArgs.args = args
@@ -100,7 +100,7 @@ class ConsoleContext implements IConsoleContext {
 	}
 
 	/**
-	 * Run JavaScript code in new scope within given context.
+	 * Run JavaScript code without creating any scope and getting any additional context.
 	 */
 	override runUnscopedJs(String code) {
 		return jsEnv.eval(code)
