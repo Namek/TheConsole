@@ -20,4 +20,12 @@ public abstract class PathUtils {
 
 		return Paths.get(myURI)
 	} catch (Exception exc) { throw exc }
+
+	def static String normalize(String path) {
+		return path.replace('\\', '/')
+	}
+
+	def static String normalize(Path path) {
+		return normalize(path.toString)
+	}
 }

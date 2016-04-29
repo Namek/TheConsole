@@ -1,7 +1,12 @@
 package net.namekdev.theconsole.state
 
+import java.nio.file.Path
 import java.util.ArrayList
 import java.util.List
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.function.Consumer
+import javafx.application.Platform
 import net.namekdev.theconsole.commands.AliasManager
 import net.namekdev.theconsole.commands.CommandLineService
 import net.namekdev.theconsole.scripts.ScriptManager
@@ -28,6 +33,8 @@ class AppStateManager implements IConsoleContextManager {
 	var InitializationConsoleContext initializationContext
 	val List<ContextInfo> contexts = new ArrayList<ContextInfo>()
 
+	val ContextTaskManager taskBag = new ContextTaskManager
+	val BlockingQueue<Consumer<IConsoleContext>> firstContextTasks = new LinkedBlockingQueue
 
 
 	new(IWindowController windowController) {
@@ -48,9 +55,11 @@ class AppStateManager implements IConsoleContextManager {
 		val aliasStorage = database.aliasesSection
 		aliasManager = new AliasManager(aliasStorage)
 
-		// TODO scripts should request context dynamically!
-		scriptManager.put("alias", new AliasScript(aliasManager, aliasStorage))
-		scriptManager.put("exec", new ExecScript())
+		firstContextTasks.put[
+			scriptManager.load()
+			scriptManager.put("alias", new AliasScript(aliasManager, aliasStorage))
+			scriptManager.put("exec", new ExecScript())
+		]
 	}
 
 
@@ -63,6 +72,10 @@ class AppStateManager implements IConsoleContextManager {
 
 		val info = new ContextInfo(newContext, commandLineService)
 		contexts.add(info)
+
+		Platform.runLater [
+			taskBag.executeTasksOnNewContext(newContext)
+		]
 
 		if (initializationContext != null) {
 			val entries = initializationContext.entries
@@ -77,6 +90,12 @@ class AppStateManager implements IConsoleContextManager {
 					newContext.output.addTextEntry(entry.text)
 				}
 			}
+
+			Platform.runLater [
+				firstContextTasks.forEach[
+					accept(newContext)
+				]
+			]
 		}
 
 		return newContext
@@ -118,4 +137,18 @@ class AppStateManager implements IConsoleContextManager {
 		return contexts.map[info|info.context]
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	override loadModule(Path entryFile) {
+		val Consumer<IConsoleContext> task = [ context |
+			context.jsEnv.loadModule(entryFile)
+		]
+
+		contexts.forEach[
+			task.accept(context)
+		]
+
+		taskBag.addModuleLoading(entryFile.toString, task)
+	}
 }

@@ -53,7 +53,9 @@ class ScriptManager implements IScriptManager {
 
 		val fs = FileSystems.getDefault()
 		scriptExtensionMatcher = fs.getPathMatcher("glob:**/*." + SCRIPT_FILE_EXTENSION)
+	}
 
+	def void load() {
 		if (!Files.isDirectory(scriptsWatchDir)) {
 			val path = scriptsWatchDir.toAbsolutePath().toString()
 			defaultContextConsole.log("No scripts folder found, creating a new one: " + path)
@@ -200,17 +202,22 @@ class ScriptManager implements IScriptManager {
 	def private void tryLoadModule(Path dir) {
 		val console = defaultContextConsole
 
-		if (Files.exists(Paths.get(dir.toString, PACKAGE_JSON))) {
+		val packageJson = Paths.get(dir.toString, PACKAGE_JSON)
+		val indexJs = Paths.get(dir.toString, INDEX_JS)
 
+		if (Files.exists(packageJson)) {
+			// TODO get 'main' field inside json file
+			// TODO validate package.json format, report if this file is in bad format
+			val entryJs = Paths.get(dir.toString, INDEX_JS)
+			consoleContextProvider.loadModule(entryJs)
 		}
-		else if (Files.exists(Paths.get(dir.toString, INDEX_JS))) {
-
+		else if (Files.exists(indexJs)) {
+			consoleContextProvider.loadModule(indexJs)
 		}
 		else {
 			console.error("Couldn't find a module in: " + dir)
 		}
 	}
-
 
 	def private void removeScriptByPath(Path path) {
 		val scriptName = pathToScriptName(path)
@@ -247,6 +254,4 @@ class ScriptManager implements IScriptManager {
 			}
 		}
 	}
-
-
 }
