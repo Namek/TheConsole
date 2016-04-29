@@ -1,5 +1,7 @@
 package net.namekdev.theconsole.view.components
 
+import java.util.regex.Pattern
+import javafx.application.Platform
 import javafx.beans.value.ChangeListener
 import javafx.event.Event
 import javafx.event.EventHandler
@@ -7,14 +9,10 @@ import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
-import javafx.scene.layout.AnchorPane
-import net.namekdev.theconsole.state.ConsoleContext
-import net.namekdev.theconsole.state.api.IConsoleContextManager
-import javafx.application.Platform
-import javafx.scene.input.InputEvent
-import javafx.scene.input.KeyEvent
 import javafx.scene.input.KeyCode
-import java.util.regex.Pattern
+import javafx.scene.input.KeyEvent
+import javafx.scene.layout.AnchorPane
+import net.namekdev.theconsole.state.api.IConsoleContextManager
 
 class ConsoleView extends AnchorPane {
 	IConsoleContextManager consoleContextManager
@@ -69,10 +67,6 @@ class ConsoleView extends AnchorPane {
 		val tab = tabPane.selectionModel.selectedItem as ConsoleTab
 		consoleContextManager.destroyContext(tab.context)
 		tabPane.tabs.remove(tab)
-	}
-
-	def void onClosingTab(ConsoleContext ctx) {
-		consoleContextManager.destroyContext(ctx)
 	}
 
 	val ChangeListener<Tab> onSwitchTabHandler = [ov, oldTab, newTab |

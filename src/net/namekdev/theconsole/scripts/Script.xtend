@@ -1,8 +1,8 @@
 package net.namekdev.theconsole.scripts
 
 import net.namekdev.theconsole.scripts.api.IScript
-import net.namekdev.theconsole.scripts.api.IScriptManager
 import net.namekdev.theconsole.state.api.IConsoleContext
+import net.namekdev.theconsole.utils.api.IDatabase.ISectionAccessor
 
 /**
  * This class doesn't have any intelligence since it's totally managed/modified by {@link JsScriptManager}.
@@ -11,18 +11,16 @@ import net.namekdev.theconsole.state.api.IConsoleContext
  * @see JsScriptManager
  */
 public class Script implements IScript {
-	IScriptManager manager
 	package String name
 	package var String code
 	val ScriptContext context
 
 
-	new(IScriptManager manager, String name, String code) {
-		this.manager = manager
+	new(String name, String code, ISectionAccessor scriptStorage) {
 		this.name = name
 		this.code = code
 
-		context = new ScriptContext(manager.createScriptStorage(name))
+		context = new ScriptContext(scriptStorage)
 	}
 
 	override run(IConsoleContext executionContext, String[] args) {

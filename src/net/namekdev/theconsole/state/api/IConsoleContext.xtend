@@ -6,7 +6,6 @@ import net.namekdev.theconsole.scripts.execution.JavaScriptExecutor
 import net.namekdev.theconsole.scripts.execution.JsUtilsProvider
 import net.namekdev.theconsole.view.api.IConsoleOutput
 import net.namekdev.theconsole.view.api.IConsolePromptInput
-import net.namekdev.theconsole.scripts.ScriptContext
 
 interface IConsoleContext {
 	def IConsolePromptInput getInput()

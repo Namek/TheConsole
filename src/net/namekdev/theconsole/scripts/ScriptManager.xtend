@@ -4,12 +4,15 @@ import java.io.File
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.nio.file.FileSystems
+import java.nio.file.FileVisitResult
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.PathMatcher
+import java.nio.file.Paths
 import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.ArrayList
+import java.util.List
 import java.util.Map
 import java.util.Queue
 import java.util.TreeMap
@@ -25,9 +28,6 @@ import static java.nio.file.FileVisitResult.*
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY
-import java.nio.file.FileVisitResult
-import java.nio.file.Paths
-import java.util.List
 
 class ScriptManager implements IScriptManager {
 	final String SCRIPT_FILE_EXTENSION = "js"
@@ -105,7 +105,7 @@ class ScriptManager implements IScriptManager {
 		return scriptNames
 	}
 
-	override createScriptStorage(String name) {
+	def createScriptStorage(String name) {
 		return scriptsDatabase.getSection(name, true)
 	}
 
@@ -183,7 +183,7 @@ class ScriptManager implements IScriptManager {
 
 			if (script == null) {
 				console.log("Loading script: " + scriptName)
-				script = new Script(this, scriptName, code)
+				script = new Script(scriptName, code, createScriptStorage(scriptName))
 				put(scriptName, script)
 			}
 			else if (script instanceof Script) {

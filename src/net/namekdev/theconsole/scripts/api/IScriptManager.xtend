@@ -10,8 +10,6 @@ interface IScriptManager {
 
 	def void remove(String name)
 
-	def ISectionAccessor createScriptStorage(String string)
-
 	/**
 	 * Get internal array for performance reasons. Do not modify it!
 	 */
