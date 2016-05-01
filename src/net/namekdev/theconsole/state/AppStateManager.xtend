@@ -1,17 +1,16 @@
 package net.namekdev.theconsole.state
 
-import java.nio.file.Path
 import java.util.ArrayList
 import java.util.List
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.function.Consumer
 import javafx.application.Platform
-import net.namekdev.theconsole.commands.AliasManager
 import net.namekdev.theconsole.commands.CommandLineService
-import net.namekdev.theconsole.scripts.ScriptManager
-import net.namekdev.theconsole.scripts.internal.AliasScript
-import net.namekdev.theconsole.scripts.internal.ExecScript
+import net.namekdev.theconsole.commands.CommandManager
+import net.namekdev.theconsole.modules.ModuleManager
+import net.namekdev.theconsole.scripts.JsFilesManager
+import net.namekdev.theconsole.state.api.ConsoleContextListener
 import net.namekdev.theconsole.state.api.IConsoleContext
 import net.namekdev.theconsole.state.api.IConsoleContextManager
 import net.namekdev.theconsole.utils.Database
@@ -22,9 +21,10 @@ import net.namekdev.theconsole.view.api.IConsolePromptInput
 import net.namekdev.theconsole.view.api.IWindowController
 
 class AppStateManager implements IConsoleContextManager {
-	ScriptManager scriptManager
-	AliasManager aliasManager
+	JsFilesManager jsFilesManager
+	CommandManager commandManager
 	IDatabase database
+	ModuleManager moduleManager
 	val IWindowController windowController
 
 	var lastContextId = 0 as int
@@ -33,8 +33,8 @@ class AppStateManager implements IConsoleContextManager {
 	var InitializationConsoleContext initializationContext
 	val List<ContextInfo> contexts = new ArrayList<ContextInfo>()
 
-	val ContextTaskManager taskBag = new ContextTaskManager
 	val BlockingQueue<Consumer<IConsoleContext>> firstContextTasks = new LinkedBlockingQueue
+	val List<ConsoleContextListener> contextListeners = new ArrayList
 
 
 	new(IWindowController windowController) {
@@ -50,15 +50,12 @@ class AppStateManager implements IConsoleContextManager {
 			this.contextOfDefaultTab.proxy.error(exc.message)
 		}
 
-		scriptManager = new ScriptManager(database, this)
-
-		val aliasStorage = database.aliasesSection
-		aliasManager = new AliasManager(aliasStorage)
+		commandManager = new CommandManager(database)
+		moduleManager = new ModuleManager(commandManager, this)
+		jsFilesManager = new JsFilesManager(database, this, commandManager, moduleManager)
 
 		firstContextTasks.put[
-			scriptManager.load()
-			scriptManager.put("alias", new AliasScript(aliasManager, aliasStorage))
-			scriptManager.put("exec", new ExecScript())
+			jsFilesManager.init()
 		]
 	}
 
@@ -68,13 +65,15 @@ class AppStateManager implements IConsoleContextManager {
 
 	override createContext(IConsolePromptInput input, IConsoleOutput output) {
 		val newContext = new ConsoleContext(windowController, input, output)
-		val commandLineService = new CommandLineService(newContext, scriptManager, aliasManager)
+		val commandLineService = new CommandLineService(newContext, commandManager)
 
 		val info = new ContextInfo(newContext, commandLineService)
 		contexts.add(info)
 
 		Platform.runLater [
-			taskBag.executeTasksOnNewContext(newContext)
+			contextListeners.forEach[
+				onNewContextCreated(newContext)
+			]
 		]
 
 		if (initializationContext != null) {
@@ -137,18 +136,7 @@ class AppStateManager implements IConsoleContextManager {
 		return contexts.map[info|info.context]
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	override loadModule(Path entryFile) {
-		val Consumer<IConsoleContext> task = [ context |
-			context.jsEnv.loadModule(entryFile)
-		]
-
-		contexts.forEach[
-			task.accept(context)
-		]
-
-		taskBag.addModuleLoading(entryFile.toString, task)
+	override registerContextListener(ConsoleContextListener listener) {
+		contextListeners.add(listener)
 	}
 }

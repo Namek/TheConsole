@@ -1,8 +1,6 @@
 package net.namekdev.theconsole.commands
 
-import net.namekdev.theconsole.commands.api.IAliasManager
 import net.namekdev.theconsole.commands.api.ICommandLineHandler
-import net.namekdev.theconsole.scripts.api.IScriptManager
 import net.namekdev.theconsole.state.api.IConsoleContext
 
 class CommandLineService {
@@ -12,10 +10,10 @@ class CommandLineService {
 	var ICommandLineHandler currentHandler
 
 
-	new(IConsoleContext consoleContext, IScriptManager scriptManager, IAliasManager aliasManager) {
+	new(IConsoleContext consoleContext, CommandManager commandManager) {
 		this.consoleContext = consoleContext
 
-		basicHandler = new CommandLineHandler(scriptManager, aliasManager)
+		basicHandler = new CommandLineHandler(commandManager)
 		resetHandler()
 	}
 

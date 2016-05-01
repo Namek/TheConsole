@@ -1,9 +1,9 @@
-package net.namekdev.theconsole.scripts.internal
+package net.namekdev.theconsole.commands.internal
 
-import net.namekdev.theconsole.scripts.api.IScript
+import net.namekdev.theconsole.commands.api.ICommand
 import net.namekdev.theconsole.state.api.IConsoleContext
 
-class ExecScript implements IScript {
+class ExecCommand implements ICommand {
 	override Object run(IConsoleContext executionContext, String[] args) {
 		val utils = executionContext.jsUtils
 		utils.assertInfo(args.length > 0, "Usage: exec <command_name/app_path + arguments>")

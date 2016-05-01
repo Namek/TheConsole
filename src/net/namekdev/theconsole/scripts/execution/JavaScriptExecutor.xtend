@@ -1,16 +1,15 @@
 package net.namekdev.theconsole.scripts.execution
 
-import javax.script.Bindings
-import javax.script.ScriptEngineManager
-import java.util.function.Function
-import javax.script.ScriptContext
-import javax.script.Invocable
-import javax.script.ScriptEngine
-import javax.script.ScriptException
 import com.google.common.base.Charsets
 import com.google.common.io.Resources
+import java.util.function.Function
+import javax.script.Bindings
+import javax.script.Invocable
+import javax.script.ScriptContext
+import javax.script.ScriptEngine
+import javax.script.ScriptEngineManager
+import javax.script.ScriptException
 import net.namekdev.theconsole.utils.PathUtils
-import java.nio.file.Path
 
 /**
  * Describes JavaScript environment that consists of useful bindings specific to The Software.
@@ -20,9 +19,6 @@ class JavaScriptExecutor {
 	var ScriptEngine engine
 	var Invocable invocable
 	var Bindings engineBindings
-
-	val SCRIPTS_DIR = PathUtils.scriptsDir
-	val SCRIPTS_DIR_STR = SCRIPTS_DIR.toString().replace('\\', '/')
 
 
 	new() {
@@ -44,7 +40,8 @@ class JavaScriptExecutor {
 
 		bindClass("System", typeof(System))
 
-		eval(Resources.toString(this.class.getResource("require.js"), Charsets.UTF_8) + '.localDir = "' + SCRIPTS_DIR_STR + '"')
+		val scriptsDir = PathUtils.scriptsDir.toString().replace('\\', '/')
+		eval(Resources.toString(this.class.getResource("require.js"), Charsets.UTF_8) + '.localDir = "' + scriptsDir + '"')
 	}
 
 	def void bindClass(String variableName, Class<?> cls) {
@@ -63,6 +60,10 @@ class JavaScriptExecutor {
 			engineBindings.put(variableName, obj)
 		}
 		catch (Exception exc) { }
+	}
+
+	def Object getObject(String variableName) {
+		engine.get(variableName)
 	}
 
 	def Object eval(String scriptCode) {
@@ -86,33 +87,5 @@ class JavaScriptExecutor {
 		}
 
 		return ret
-	}
-
-	/**
-	 * Load module be <code>require()</code>-ing given <code>.js</code> file.
-	 */
-	def void loadModule(Path entryFile) {
-		val path = PathUtils.normalize(SCRIPTS_DIR.relativize(entryFile))
-		val pathParts = path.split('/')
-		val name = pathParts.get(pathParts.length-2)
-
-		// if same module is already loaded then unload it first
-		val module = engine.get(name)
-		if (module != null) {
-			eval('''
-				if («name».onunload)
-					«name».onunload();
-			''')
-		}
-
-		// load module and leave it as a global variable «name»
-		eval('''
-			console.log("Loading module: «name»");
-			var «name» = require("«path»");
-
-			if («name».onload)
-				«name».onload();
-		''')
-
 	}
 }

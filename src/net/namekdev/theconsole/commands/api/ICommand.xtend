@@ -1,7 +1,7 @@
-package net.namekdev.theconsole.scripts.api
+package net.namekdev.theconsole.commands.api
 
 import net.namekdev.theconsole.state.api.IConsoleContext
 
-interface IScript {
+interface ICommand {
 	def Object run(IConsoleContext executionContext, String[] args)
 }

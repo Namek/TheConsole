@@ -4,10 +4,8 @@ import java.util.ArrayList
 import java.util.regex.Pattern
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
-import net.namekdev.theconsole.commands.api.IAliasManager
+import net.namekdev.theconsole.commands.api.ICommand
 import net.namekdev.theconsole.commands.api.ICommandLineHandler
-import net.namekdev.theconsole.scripts.api.IScript
-import net.namekdev.theconsole.scripts.api.IScriptManager
 import net.namekdev.theconsole.scripts.execution.ScriptAssertError
 import net.namekdev.theconsole.state.api.IConsoleContext
 import net.namekdev.theconsole.view.api.IConsoleOutput
@@ -15,8 +13,8 @@ import net.namekdev.theconsole.view.api.IConsoleOutputEntry
 import net.namekdev.theconsole.view.api.IConsolePromptInput
 
 class CommandLineHandler implements ICommandLineHandler {
-	val IScriptManager scriptManager
-	val IAliasManager aliasManager
+	val CommandManager commandManager
+	val AliasManager aliasManager
 
 	var IConsoleContext consoleContext
 	var IConsolePromptInput consolePrompt
@@ -33,9 +31,9 @@ class CommandLineHandler implements ICommandLineHandler {
 	var lastAddedEntry = null as IConsoleOutputEntry
 	var String temporaryCommandName
 
-	new(IScriptManager scriptManager, IAliasManager aliasManager) {
-		this.scriptManager = scriptManager
-		this.aliasManager = aliasManager
+	new(CommandManager commandManager) {
+		this.commandManager = commandManager
+		this.aliasManager = commandManager.aliases
 	}
 
 	override initContext(IConsoleContext context) {
@@ -146,8 +144,8 @@ class CommandLineHandler implements ICommandLineHandler {
 
 		// TODO search between aliases too
 		commandNames.clear()
-		commandNames.ensureCapacity(scriptManager.getScriptCount() + aliasManager.getAliasCount())
-		scriptManager.findScriptNamesStartingWith(namePart, commandNames)
+		commandNames.ensureCapacity(commandManager.commandCount + aliasManager.aliasCount)
+		commandManager.findCommandNamesStartingWith(namePart, commandNames)
 		aliasManager.findAliasesStartingWith(namePart, commandNames)
 
 		// Complete this command
@@ -193,7 +191,7 @@ class CommandLineHandler implements ICommandLineHandler {
 
 		// Just present command list
 		else {
-			val allScriptNames = scriptManager.getAllScriptNames()
+			val allScriptNames = commandManager.getAllScriptNames()
 			val allAliasNames = aliasManager.getAllAliasNames()
 			commandNames.clear()
 			commandNames.addAll(allScriptNames)
@@ -266,15 +264,15 @@ class CommandLineHandler implements ICommandLineHandler {
 				args.add(parameterValue)
 			}
 
-			// Look for script of such name
-			var script = scriptManager.get(commandName) as IScript
+			// Look for command of such name
+			var command = commandManager.get(commandName) as ICommand
 
-			if (script != null) {
+			if (command != null) {
 				// TODO validate arguments here
 
 				var result = null as Object
 				try {
-					result = script.run(consoleContext, args)
+					result = command.run(consoleContext, args)
 				}
 				catch (ScriptAssertError assertion) {
 					if (assertion.isError) {
@@ -297,10 +295,10 @@ class CommandLineHandler implements ICommandLineHandler {
 			}
 			else if (!ignoreAliases) {
 				// There is no script named by `commandName` so look for aliases
-				val command = aliasManager.get(commandName)
+				val commandStr = aliasManager.get(commandName)
 
-				if (command != null) {
-					val newFullCommand = command + fullCommand.substring(commandNameEndIndex)
+				if (commandStr != null) {
+					val newFullCommand = commandStr + fullCommand.substring(commandNameEndIndex)
 					tryExecuteCommand(newFullCommand, true)
 				}
 				else {

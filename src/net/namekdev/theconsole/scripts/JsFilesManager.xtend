@@ -8,7 +8,6 @@ import java.nio.file.FileVisitResult
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.PathMatcher
-import java.nio.file.Paths
 import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.ArrayList
@@ -16,8 +15,9 @@ import java.util.List
 import java.util.Map
 import java.util.Queue
 import java.util.TreeMap
-import net.namekdev.theconsole.scripts.api.IScript
-import net.namekdev.theconsole.scripts.api.IScriptManager
+import net.namekdev.theconsole.commands.CommandManager
+import net.namekdev.theconsole.commands.internal.ScriptCommand
+import net.namekdev.theconsole.modules.ModuleManager
 import net.namekdev.theconsole.state.api.IConsoleContextProvider
 import net.namekdev.theconsole.utils.PathUtils
 import net.namekdev.theconsole.utils.RecursiveWatcher
@@ -29,33 +29,34 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY
 
-class ScriptManager implements IScriptManager {
+class JsFilesManager {
 	final String SCRIPT_FILE_EXTENSION = "js"
-	final String PACKAGE_JSON = "package.json"
-	final String INDEX_JS = "index.js"
-
-	val Map<String, IScript> scripts = new TreeMap<String, IScript>()
-	val scriptNames = new ArrayList<String>()
 
 	IDatabase settingsDatabase
 	IDatabase.ISectionAccessor scriptsDatabase
 	IConsoleContextProvider consoleContextProvider
+	CommandManager commandManager
+	ModuleManager moduleManager
 
 	final Path scriptsWatchDir = PathUtils.scriptsDir
 	private PathMatcher scriptExtensionMatcher
 
+	Map<String, ScriptCommand> scripts = new TreeMap
 
 
-	new(IDatabase database, IConsoleContextProvider consoleContextProvider) {
+
+	new(IDatabase database, IConsoleContextProvider consoleContextProvider, CommandManager commandManager, ModuleManager moduleManager) {
 		this.settingsDatabase = database
 		this.scriptsDatabase = settingsDatabase.getScriptsSection()
 		this.consoleContextProvider = consoleContextProvider
+		this.commandManager = commandManager
+		this.moduleManager = moduleManager
 
 		val fs = FileSystems.getDefault()
 		scriptExtensionMatcher = fs.getPathMatcher("glob:**/*." + SCRIPT_FILE_EXTENSION)
 	}
 
-	def void load() {
+	def void init() {
 		if (!Files.isDirectory(scriptsWatchDir)) {
 			val path = scriptsWatchDir.toAbsolutePath().toString()
 			defaultContextConsole.log("No scripts folder found, creating a new one: " + path)
@@ -67,7 +68,7 @@ class ScriptManager implements IScriptManager {
 		analyzeScriptsFolder(scriptsWatchDir)
 
 		try {
-			val RecursiveWatcher watcher = new RecursiveWatcher(scriptsWatchDir, 500, scriptsFileWatcher)
+			val RecursiveWatcher watcher = new RecursiveWatcher(scriptsWatchDir, 500, scriptsFolderWatcher)
 			watcher.start()
 		}
 		catch (IOException exc) {
@@ -79,59 +80,17 @@ class ScriptManager implements IScriptManager {
 		return consoleContextProvider.contextOfDefaultTab.proxy
 	}
 
-	override get(String name) {
-		return scripts.get(name)
-	}
-
-	override put(String name, IScript script) {
-		scripts.put(name, script)
-
-		if (!scriptNames.exists[n|n.equals(name)]) {
-			scriptNames.add(name)
-			scriptNames.sort()
-		}
-	}
-
-	override remove(String name) {
-		scripts.remove(name)
-		scriptNames.removeIf[n|n.equals(name)]
-	}
-
-	override getScriptCount() {
-		return scripts.size()
-	}
-
-	override getAllScriptNames() {
-		return scriptNames
-	}
-
-	def createScriptStorage(String name) {
+	def private createScriptStorage(String name) {
 		return scriptsDatabase.getSection(name, true)
 	}
 
-	override findScriptNamesStartingWith(String namePart, ArrayList<String> outNames) {
-		if (namePart.length() == 0) {
-			return
-		}
-
-		for (String scriptName : scriptNames) {
-			if (scriptName.indexOf(namePart) == 0) {
-				outNames.add(scriptName)
-			}
-		}
-	}
-
 	def private void analyzeScriptsFolder(Path folder) {
-		val console = defaultContextConsole
 		val List<Path> modules = new ArrayList
 		val List<Path> scripts = new ArrayList
 
 		Files.walkFileTree(folder, new SimpleFileVisitor<Path>() {
 			override FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
-				val packageJson = Paths.get(dir.toString, PACKAGE_JSON)
-				val indexJs = Paths.get(dir.toString, INDEX_JS)
-
-				if (Files.exists(packageJson) || Files.exists(indexJs)) {
+				if (ModuleManager.isModule(dir)) {
 					modules.add(dir)
 
 					return SKIP_SUBTREE
@@ -155,10 +114,10 @@ class ScriptManager implements IScriptManager {
 			}
 		})
 
-		// initialize modules first, later normal scripts
+		// initialize modules first, later single-file scripts
 
 		modules.forEach [modulePath |
-			tryLoadModule(modulePath)
+			moduleManager.receiveModulePath(modulePath)
 		]
 
 		scripts.forEach [scriptPath |
@@ -179,19 +138,17 @@ class ScriptManager implements IScriptManager {
 
 			// TODO try to pre-compile script for error-check
 
-			var script = get(scriptName)
+			var script = scripts.get(scriptName)
 
 			if (script == null) {
 				console.log("Loading script: " + scriptName)
-				script = new Script(scriptName, code, createScriptStorage(scriptName))
-				put(scriptName, script)
-			}
-			else if (script instanceof Script) {
-				console.log("Reloading script: " + scriptName)
-				(script as Script).code = code
+				script = new ScriptCommand(scriptName, code, createScriptStorage(scriptName))
+				scripts.put(scriptName, script)
+				commandManager.put(scriptName, script)
 			}
 			else {
-				console.error("Cannot overwrite core script: " + scriptName)
+				console.log("Reloading script: " + scriptName)
+				script.code = code
 			}
 		}
 		catch (IOException exc) {
@@ -199,29 +156,10 @@ class ScriptManager implements IScriptManager {
 		}
 	}
 
-	def private void tryLoadModule(Path dir) {
-		val console = defaultContextConsole
-
-		val packageJson = Paths.get(dir.toString, PACKAGE_JSON)
-		val indexJs = Paths.get(dir.toString, INDEX_JS)
-
-		if (Files.exists(packageJson)) {
-			// TODO get 'main' field inside json file
-			// TODO validate package.json format, report if this file is in bad format
-			val entryJs = Paths.get(dir.toString, INDEX_JS)
-			consoleContextProvider.loadModule(entryJs)
-		}
-		else if (Files.exists(indexJs)) {
-			consoleContextProvider.loadModule(indexJs)
-		}
-		else {
-			console.error("Couldn't find a module in: " + dir)
-		}
-	}
-
 	def private void removeScriptByPath(Path path) {
 		val scriptName = pathToScriptName(path)
-		remove(scriptName)
+		scripts.remove(scriptName)
+		commandManager.remove(scriptName)
 	}
 
 	def private String pathToScriptName(Path path) {
@@ -234,22 +172,27 @@ class ScriptManager implements IScriptManager {
 		return filename
 	}
 
-	val scriptsFileWatcher = new RecursiveWatcher.WatchListener {
+	val scriptsFolderWatcher = new RecursiveWatcher.WatchListener {
 		override onWatchEvents(Queue<FileChangeEvent> events) {
-			// TODO check if containing folder is a module
-			// (need to go by path up to `scripts` root)
-
 			for (FileChangeEvent evt : events) {
 				val fullPath = evt.parentFolderPath.resolve(evt.relativePath)
+				val isModule = moduleManager.doesFileBelongToModule(fullPath)
 
-				if (evt.eventType == ENTRY_CREATE) {
-					tryReadScriptFile(fullPath)
-				}
-				else if (evt.eventType == ENTRY_MODIFY) {
-					tryReadScriptFile(fullPath)
+				if (evt.eventType == ENTRY_CREATE || evt.eventType == ENTRY_MODIFY) {
+					if (isModule) {
+						moduleManager.receiveModulePath(fullPath.parent)
+					}
+					else {
+						tryReadScriptFile(fullPath)
+					}
 				}
 				else if (evt.eventType == ENTRY_DELETE) {
-					removeScriptByPath(fullPath)
+					if (isModule) {
+						moduleManager.receiveModuleDeleted(fullPath.parent)
+					}
+					else {
+						removeScriptByPath(fullPath)
+					}
 				}
 			}
 		}

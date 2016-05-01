@@ -1,14 +1,14 @@
-package net.namekdev.theconsole.scripts.internal
+package net.namekdev.theconsole.commands.internal
 
 import com.eclipsesource.json.Json
 import java.util.ArrayList
-import net.namekdev.theconsole.commands.api.IAliasManager
-import net.namekdev.theconsole.scripts.api.IScript
+import net.namekdev.theconsole.commands.AliasManager
+import net.namekdev.theconsole.commands.api.ICommand
 import net.namekdev.theconsole.state.api.IConsoleContext
 import net.namekdev.theconsole.utils.api.IDatabase.ISectionAccessor
 
-class AliasScript implements IScript {
-	protected IAliasManager aliasManager
+class AliasCommand implements ICommand {
+	protected AliasManager aliasManager
 	protected ISectionAccessor storage
 
 	private ArrayList<String> tmpArray = new ArrayList<String>()
@@ -19,7 +19,7 @@ class AliasScript implements IScript {
  - alias <alias> <command> [param, [param, [...]]]'
 
 
-	new(IAliasManager aliasManager, ISectionAccessor storage) {
+	new(AliasManager aliasManager, ISectionAccessor storage) {
 		this.aliasManager = aliasManager
 		this.storage = storage
 	}
