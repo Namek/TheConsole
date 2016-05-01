@@ -32,6 +32,7 @@
     if (file.slice(-3) !== '.js') file += '.js'
     return cache[file] || executeAndCache(file)
   }
+  require.cache = cache
   require.settings = settings
 
   return settings

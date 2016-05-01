@@ -91,11 +91,12 @@ class ModuleManager {
 				// TODO check if given variable is not already registered for other module.
 				// TODO think of algorithm about other variable - maybe some module priorities configurable by user?
 
-				val relativeDirectory = PathUtils.normalize(PathUtils.scriptsDir.relativize(entryJs))
-				val pathParts = relativeDirectory.split('/')
+				val relativeFilePath = PathUtils.scriptsDir.relativize(entryJs)
+				val relativeFilePathStr = PathUtils.normalize(relativeFilePath)
+				val pathParts = relativeFilePathStr.split('/')
 				val variableName = pathParts.get(pathParts.length-2)
 
-				val module = new Module(entryJs, relativeDirectory, variableName)
+				val module = new Module(entryJs, variableName)
 
 				defaultContextConsole.log("Loading module: " + name)
 				loadedModules.put(name, module)
@@ -148,19 +149,19 @@ class ModuleManager {
 	}
 
 	private def void triggerModuleRequire(IConsoleContext context, Module module) {
-		triggerModuleRequire(context.jsEnv, module.entryFile, module.relativeDirectory, module.variableName)
+		triggerModuleRequire(context.jsEnv, module.entryFile, module.relativeEntryFilePath, module.variableName)
 	}
 
 	/**
 	 * Load module be <code>require()</code>-ing given <code>.js</code> file.
 	 */
-	private def void triggerModuleRequire(JavaScriptEnvironment jsEnv, Path entryFile, String relativeDirectory, String variableName) {
+	private def void triggerModuleRequire(JavaScriptEnvironment jsEnv, Path entryFile, String relativeEntryFilePath, String variableName) {
 		// if same module is already loaded then unload it first
-		triggerModuleUnload(jsEnv, entryFile)
+		triggerModuleUnload(jsEnv, relativeEntryFilePath, variableName)
 
 		// load module and leave it as a global variable «name»
 		jsEnv.eval('''
-			var «variableName» = require("«relativeDirectory»")
+			var «variableName» = require("«relativeEntryFilePath»")
 
 			if («variableName».onload)
 				«variableName».onload()
@@ -169,22 +170,22 @@ class ModuleManager {
 
 	private def void triggerModuleUnload(Module module) {
 		consoleContextProvider.contexts.forEach[context |
-			triggerModuleUnload(context.jsEnv, module.entryFile)
+			triggerModuleUnload(context.jsEnv, module.relativeEntryFilePath, module.variableName)
 		]
 	}
 
-	private def void triggerModuleUnload(JavaScriptEnvironment jsEnv, Path entryFile) {
-		// TODO Refactor: unify identification - put that name into Module class
-		val path = PathUtils.normalize(PathUtils.scriptsDir.relativize(entryFile))
-		val pathParts = path.split('/')
-		val name = pathParts.get(pathParts.length-2)
+	private def void triggerModuleUnload(JavaScriptEnvironment jsEnv, String relativeEntryFilePath, String variableName) {
+		val module = jsEnv.getObject(variableName)
 
-		val module = jsEnv.getObject(name)
 		if (module != null) {
 			jsEnv.eval('''
-				if («name».onunload)
-					«name».onunload()
+				if («variableName».onunload)
+					«variableName».onunload()
+
+				delete require.cache["«relativeEntryFilePath.toString»"]
 			''')
+
+			jsEnv.unbindObject(variableName)
 		}
 	}
 
@@ -204,7 +205,7 @@ class ModuleManager {
 
 		override onContextDestroying(IConsoleContext context) {
 			loadedModules.forEach[name, module |
-				context.jsEnv.triggerModuleUnload(module.entryFile)
+				triggerModuleUnload(context.jsEnv, module.relativeEntryFilePath, module.variableName)
 			]
 		}
 	}
