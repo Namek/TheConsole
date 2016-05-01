@@ -1,5 +1,7 @@
 package net.namekdev.theconsole.modules
 
+import com.google.common.base.Charsets
+import com.google.common.io.Resources
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -7,7 +9,7 @@ import java.util.Map
 import java.util.TreeMap
 import net.namekdev.theconsole.commands.CommandManager
 import net.namekdev.theconsole.scripts.ConsoleProxy
-import net.namekdev.theconsole.scripts.execution.JavaScriptExecutor
+import net.namekdev.theconsole.scripts.execution.JavaScriptEnvironment
 import net.namekdev.theconsole.state.api.ConsoleContextListener
 import net.namekdev.theconsole.state.api.IConsoleContext
 import net.namekdev.theconsole.state.api.IConsoleContextProvider
@@ -25,7 +27,7 @@ class ModuleManager {
 	IConsoleContextProvider consoleContextProvider
 
 	val Map<String, Module> loadedModules = new TreeMap
-	val CommandManager commands
+	val CommandManager commandManager
 
 
 	static def isModule(Path dir) {
@@ -37,7 +39,7 @@ class ModuleManager {
 
 
 	new(CommandManager commands, IConsoleContextProvider consoleContextProvider) {
-		this.commands = commands
+		this.commandManager = commands
 		this.consoleContextProvider = consoleContextProvider
 
 		consoleContextProvider.registerContextListener(consoleContextListener)
@@ -86,7 +88,14 @@ class ModuleManager {
 			}
 
 			if (entryJs != null) {
-				val module = new Module(entryJs)
+				// TODO check if given variable is not already registered for other module.
+				// TODO think of algorithm about other variable - maybe some module priorities configurable by user?
+
+				val relativeDirectory = PathUtils.normalize(PathUtils.scriptsDir.relativize(entryJs))
+				val pathParts = relativeDirectory.split('/')
+				val variableName = pathParts.get(pathParts.length-2)
+
+				val module = new Module(entryJs, relativeDirectory, variableName)
 
 				defaultContextConsole.log("Loading module: " + name)
 				loadedModules.put(name, module)
@@ -127,30 +136,34 @@ class ModuleManager {
 		consoleContextProvider.contexts.forEach[context |
 			triggerModuleRequire(context, module)
 		]
+
+		// get current list of commands
+		val firstContext = consoleContextProvider.contexts.get(0)
+		val commands = (firstContext.jsEnv.eval('''
+			Java.to(Object.keys(«module.variableName».commands))
+		''') as Object[]).map[el | el as String]
+
+		// load/unload commands
+		module.refreshCommands(this.commandManager, commands)
 	}
 
 	private def void triggerModuleRequire(IConsoleContext context, Module module) {
-		triggerModuleRequire(context.jsEnv, module.entryFile)
+		triggerModuleRequire(context.jsEnv, module.entryFile, module.relativeDirectory, module.variableName)
 	}
 
 	/**
 	 * Load module be <code>require()</code>-ing given <code>.js</code> file.
 	 */
-	private def void triggerModuleRequire(JavaScriptExecutor jsEnv, Path entryFile) {
-		// TODO Refactor: unify identification
-		val path = PathUtils.normalize(PathUtils.scriptsDir.relativize(entryFile))
-		val pathParts = path.split('/')
-		val name = pathParts.get(pathParts.length-2)
-
+	private def void triggerModuleRequire(JavaScriptEnvironment jsEnv, Path entryFile, String relativeDirectory, String variableName) {
 		// if same module is already loaded then unload it first
 		triggerModuleUnload(jsEnv, entryFile)
 
 		// load module and leave it as a global variable «name»
 		jsEnv.eval('''
-			var «name» = require("«path»")
+			var «variableName» = require("«relativeDirectory»")
 
-			if («name».onload)
-				«name».onload()
+			if («variableName».onload)
+				«variableName».onload()
 		''')
 	}
 
@@ -160,8 +173,8 @@ class ModuleManager {
 		]
 	}
 
-	private def void triggerModuleUnload(JavaScriptExecutor jsEnv, Path entryFile) {
-		// TODO Refactor: unify identification
+	private def void triggerModuleUnload(JavaScriptEnvironment jsEnv, Path entryFile) {
+		// TODO Refactor: unify identification - put that name into Module class
 		val path = PathUtils.normalize(PathUtils.scriptsDir.relativize(entryFile))
 		val pathParts = path.split('/')
 		val name = pathParts.get(pathParts.length-2)
@@ -178,6 +191,12 @@ class ModuleManager {
 
 	val consoleContextListener = new ConsoleContextListener {
 		override onNewContextCreated(IConsoleContext context) {
+			val scriptsDir = PathUtils.scriptsDir.toString().replace('\\', '/')
+			val requireJsCode = Resources.toString(this.class.getResource("require.js"), Charsets.UTF_8)
+				+ '.localDir = "' + scriptsDir + '"'
+
+			context.jsEnv.eval(requireJsCode)
+
 			loadedModules.forEach[name, module |
 				triggerModuleRequire(context, module)
 			]

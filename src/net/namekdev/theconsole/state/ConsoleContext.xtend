@@ -5,7 +5,7 @@ import java.io.OutputStream
 import java.io.PrintWriter
 import java.util.function.BiConsumer
 import net.namekdev.theconsole.scripts.ConsoleProxy
-import net.namekdev.theconsole.scripts.execution.JavaScriptExecutor
+import net.namekdev.theconsole.scripts.execution.JavaScriptEnvironment
 import net.namekdev.theconsole.scripts.execution.JsUtilsProvider
 import net.namekdev.theconsole.state.api.IConsoleContext
 import net.namekdev.theconsole.state.api.IConsoleContextManager
@@ -24,7 +24,7 @@ class ConsoleContext implements IConsoleContext {
 	private var ConsoleProxy proxy
 	private var PrintWriter errorStream
 	private var JsUtilsProvider jsUtils
-	private var JavaScriptExecutor jsEnv
+	private var JavaScriptEnvironment jsEnv
 
 	val tempArgs = new TemporaryArgs
 
@@ -60,7 +60,7 @@ class ConsoleContext implements IConsoleContext {
 	}
 
 	def private createJsEnvironment() {
-		val jsEnv = new JavaScriptExecutor()
+		val jsEnv = new JavaScriptEnvironment()
 		jsEnv.bindObject("Utils", jsUtils)
 		jsEnv.bindObject("TemporaryArgs", tempArgs)
 		jsEnv.bindObject("console", proxy)

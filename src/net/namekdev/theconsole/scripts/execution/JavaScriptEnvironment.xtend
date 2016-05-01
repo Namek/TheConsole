@@ -1,7 +1,5 @@
 package net.namekdev.theconsole.scripts.execution
 
-import com.google.common.base.Charsets
-import com.google.common.io.Resources
 import java.util.function.Function
 import javax.script.Bindings
 import javax.script.Invocable
@@ -9,12 +7,11 @@ import javax.script.ScriptContext
 import javax.script.ScriptEngine
 import javax.script.ScriptEngineManager
 import javax.script.ScriptException
-import net.namekdev.theconsole.utils.PathUtils
 
 /**
  * Describes JavaScript environment that consists of useful bindings specific to The Software.
  */
-class JavaScriptExecutor {
+class JavaScriptEnvironment {
 	val ScriptEngineManager engineManager
 	var ScriptEngine engine
 	var Invocable invocable
@@ -39,9 +36,6 @@ class JavaScriptExecutor {
 		})
 
 		bindClass("System", typeof(System))
-
-		val scriptsDir = PathUtils.scriptsDir.toString().replace('\\', '/')
-		eval(Resources.toString(this.class.getResource("require.js"), Charsets.UTF_8) + '.localDir = "' + scriptsDir + '"')
 	}
 
 	def void bindClass(String variableName, Class<?> cls) {
@@ -60,6 +54,10 @@ class JavaScriptExecutor {
 			engineBindings.put(variableName, obj)
 		}
 		catch (Exception exc) { }
+	}
+
+	def void unbindObject(String variableName) {
+		engineBindings.remove(variableName)
 	}
 
 	def Object getObject(String variableName) {
