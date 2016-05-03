@@ -14,6 +14,7 @@ import net.namekdev.theconsole.state.api.ConsoleContextListener
 import net.namekdev.theconsole.state.api.IConsoleContext
 import net.namekdev.theconsole.state.api.IConsoleContextProvider
 import net.namekdev.theconsole.utils.PathUtils
+import net.namekdev.theconsole.utils.api.IDatabase
 
 /**
  * Registers commands.
@@ -26,6 +27,7 @@ class ModuleManager {
 
 	IConsoleContextProvider consoleContextProvider
 
+	val IDatabase settings
 	val Map<String, Module> loadedModules = new TreeMap
 	val CommandManager commandManager
 
@@ -38,7 +40,8 @@ class ModuleManager {
 	}
 
 
-	new(CommandManager commands, IConsoleContextProvider consoleContextProvider) {
+	new(IDatabase settings, CommandManager commands, IConsoleContextProvider consoleContextProvider) {
+		this.settings = settings
 		this.commandManager = commands
 		this.consoleContextProvider = consoleContextProvider
 
@@ -96,7 +99,8 @@ class ModuleManager {
 				val pathParts = relativeFilePathStr.split('/')
 				val variableName = pathParts.get(pathParts.length-2)
 
-				val module = new Module(entryJs, variableName)
+				val moduleStorage = settings.getModulesSection().getSection(name, true)
+				val module = new Module(entryJs, variableName, moduleStorage)
 
 				defaultContextConsole.log("Loading module: " + name)
 				loadedModules.put(name, module)
@@ -148,23 +152,22 @@ class ModuleManager {
 		module.refreshCommands(this.commandManager, commands)
 	}
 
-	private def void triggerModuleRequire(IConsoleContext context, Module module) {
-		triggerModuleRequire(context.jsEnv, module.entryFile, module.relativeEntryFilePath, module.variableName)
-	}
-
 	/**
 	 * Load module be <code>require()</code>-ing given <code>.js</code> file.
 	 */
-	private def void triggerModuleRequire(JavaScriptEnvironment jsEnv, Path entryFile, String relativeEntryFilePath, String variableName) {
+	private def void triggerModuleRequire(IConsoleContext context, Module module) {
 		// if same module is already loaded then unload it first
-		triggerModuleUnload(jsEnv, relativeEntryFilePath, variableName)
+		triggerModuleUnload(context.jsEnv, module.relativeEntryFilePath, module.variableName)
+
+		// set context of module (`this` variable available in `onload`)
+		context.jsEnv.tempArgs.context = module.context
 
 		// load module and leave it as a global variable «name»
-		jsEnv.eval('''
-			var «variableName» = require("«relativeEntryFilePath»")
+		context.jsEnv.eval('''
+			var «module.variableName» = require("«module.relativeEntryFilePath»")
 
-			if («variableName».onload)
-				«variableName».onload()
+			if («module.variableName».onload)
+				«module.variableName».onload.apply(TemporaryArgs.context, null)
 		''')
 	}
 

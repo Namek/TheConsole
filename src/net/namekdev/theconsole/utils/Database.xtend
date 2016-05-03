@@ -20,6 +20,7 @@ import com.eclipsesource.json.ParseException
 class Database implements IDatabase {
 	protected final String ALIASES_SECTION = "aliases"
 	protected final String SCRIPTS_SECTION = "scripts"
+	protected final String MODULES_SECTION = "modules"
 
 	private File file
 	public JsonObject content
@@ -80,6 +81,10 @@ class Database implements IDatabase {
 
 	override getScriptsSection() {
 		return getSection(SCRIPTS_SECTION, true)
+	}
+
+	override getModulesSection() {
+		return getSection(MODULES_SECTION, true)
 	}
 
 	def private SectionAccessor getSection(JsonObject root, String section, boolean createIfDoesntExist) {

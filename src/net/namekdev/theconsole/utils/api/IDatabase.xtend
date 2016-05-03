@@ -8,6 +8,7 @@ interface IDatabase {
 	def ISectionAccessor getSection(String section, boolean createIfDoesntExist)
 	def ISectionAccessor getAliasesSection()
 	def ISectionAccessor getScriptsSection()
+	def ISectionAccessor getModulesSection()
 
 
 	interface ISectionAccessor {

@@ -51,7 +51,7 @@ class AppStateManager implements IConsoleContextManager {
 		}
 
 		commandManager = new CommandManager(database)
-		moduleManager = new ModuleManager(commandManager, this)
+		moduleManager = new ModuleManager(database, commandManager, this)
 		jsFilesManager = new JsFilesManager(database, this, commandManager, moduleManager)
 
 		firstContextTasks.put[

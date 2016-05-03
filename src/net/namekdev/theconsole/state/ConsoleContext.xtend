@@ -26,7 +26,6 @@ class ConsoleContext implements IConsoleContext {
 	private var JsUtilsProvider jsUtils
 	private var JavaScriptEnvironment jsEnv
 
-	val tempArgs = new TemporaryArgs
 
 
 	// TODO add database here! (or don't because problem down below...)
@@ -62,7 +61,6 @@ class ConsoleContext implements IConsoleContext {
 	def private createJsEnvironment() {
 		val jsEnv = new JavaScriptEnvironment()
 		jsEnv.bindObject("Utils", jsUtils)
-		jsEnv.bindObject("TemporaryArgs", tempArgs)
 		jsEnv.bindObject("console", proxy)
 
 		jsEnv.bindObject("assert", new BiConsumer<Boolean, String> {
@@ -93,8 +91,8 @@ class ConsoleContext implements IConsoleContext {
 	 * Run JavaScript code in new scope within given context.
 	 */
 	override runJs(String code, Object[] args, Object context) {
-		tempArgs.args = args
-		tempArgs.context = context
+		jsEnv.tempArgs.args = args
+		jsEnv.tempArgs.context = context
 
 		return runUnscopedJs("(function(args, Storage) {" + code + "})(Java.from(TemporaryArgs.args), TemporaryArgs.context.Storage)")
 	}
@@ -129,11 +127,4 @@ class ConsoleContext implements IConsoleContext {
 	override getJsEnv() {
 		return this.jsEnv
 	}
-
-
-	static class TemporaryArgs {
-		public Object[] args
-		public Object context
-	}
-
 }

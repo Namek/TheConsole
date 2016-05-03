@@ -17,6 +17,8 @@ class JavaScriptEnvironment {
 	var Invocable invocable
 	var Bindings engineBindings
 
+	public val tempArgs = new TemporaryArgs
+
 
 	new() {
 		engineManager = new ScriptEngineManager()
@@ -36,6 +38,7 @@ class JavaScriptEnvironment {
 		})
 
 		bindClass("System", typeof(System))
+		bindObject("TemporaryArgs", tempArgs)
 	}
 
 	def void bindClass(String variableName, Class<?> cls) {
@@ -85,5 +88,11 @@ class JavaScriptEnvironment {
 		}
 
 		return ret
+	}
+
+
+	static class TemporaryArgs {
+		public Object[] args
+		public Object context
 	}
 }

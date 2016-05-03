@@ -6,6 +6,7 @@ import java.util.List
 import net.namekdev.theconsole.commands.CommandManager
 import net.namekdev.theconsole.commands.internal.ModuleCommand
 import net.namekdev.theconsole.utils.PathUtils
+import net.namekdev.theconsole.utils.api.IDatabase.ISectionAccessor
 
 class Module {
 	public val Path entryFile
@@ -14,14 +15,18 @@ class Module {
 	public val String relativeDirectory
 	public val String variableName
 
+	public val ISectionAccessor storage
 	val registeredCommands = new ArrayList<String>
+	public val ModuleContext context
 
-	new(Path entryFile, String variableName) {
+	new(Path entryFile, String variableName, ISectionAccessor moduleStorage) {
 		this.entryFile = entryFile
 		this.directory = entryFile.parent
 		this.relativeEntryFilePath = PathUtils.normalize(PathUtils.scriptsDir.relativize(entryFile))
 		this.relativeDirectory = PathUtils.normalize(PathUtils.scriptsDir.relativize(directory))
 		this.variableName = variableName
+		this.storage = moduleStorage
+		this.context = new ModuleContext(this)
 	}
 
 	def void refreshCommands(CommandManager commandManager, List<String> commands) {
