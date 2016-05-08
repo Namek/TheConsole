@@ -62,6 +62,10 @@ class AliasCommand implements ICommand {
 				sb.append(name)
 				sb.append(": ")
 				sb.append(alias.asString())
+
+				if (i != n-1) {
+					sb.append('\n')
+				}
 			}
 			console.log(sb.toString())
 		}
