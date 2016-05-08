@@ -25,7 +25,10 @@ class CommandLineHandler implements ICommandLineHandler {
 	val SPACE_CHAR = 32 as char
 	val NEW_LINE_CHAR = 10 as char
 
-	val paramRegex = Pattern.compile('''(\d+(\.\d*)?)|(\w+)|\"([^\"]*)\"|\'([^']*)\'|`([^`]*)`''', Pattern.UNICODE_CHARACTER_CLASS)
+	val paramRegex = Pattern.compile(
+		'''(\d+(\.\d*)?)|([\w:/\\\.]+)|\"([^\"]*)\"|\'([^']*)\'|`([^`]*)`''',
+		Pattern.UNICODE_CHARACTER_CLASS
+	)
 
 	val commandNames = new ArrayList<String>()
 	var lastAddedEntry = null as IConsoleOutputEntry
