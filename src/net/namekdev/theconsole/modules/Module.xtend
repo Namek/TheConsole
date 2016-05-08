@@ -9,6 +9,7 @@ import net.namekdev.theconsole.utils.PathUtils
 import net.namekdev.theconsole.utils.api.IDatabase.ISectionAccessor
 
 class Module {
+	public val String name
 	public val Path entryFile
 	public val Path directory
 	public val String relativeEntryFilePath
@@ -19,7 +20,8 @@ class Module {
 	val registeredCommands = new ArrayList<String>
 	public val ModuleContext context
 
-	new(Path entryFile, String variableName, ISectionAccessor moduleStorage) {
+	new(String name, Path entryFile, String variableName, ISectionAccessor moduleStorage) {
+		this.name = name
 		this.entryFile = entryFile
 		this.directory = entryFile.parent
 		this.relativeEntryFilePath = PathUtils.normalize(PathUtils.scriptsDir.relativize(entryFile))

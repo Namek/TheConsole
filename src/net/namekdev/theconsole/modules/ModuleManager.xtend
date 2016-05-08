@@ -15,6 +15,7 @@ import net.namekdev.theconsole.state.api.IConsoleContext
 import net.namekdev.theconsole.state.api.IConsoleContextProvider
 import net.namekdev.theconsole.utils.PathUtils
 import net.namekdev.theconsole.utils.api.IDatabase
+import net.namekdev.theconsole.scripts.execution.ScriptAssertError
 
 /**
  * Registers commands.
@@ -61,7 +62,6 @@ class ModuleManager {
 	 * Load or reload a module.
 	 */
 	def void receiveModulePath(Path moduleFolder) {
-		// TODO register commands
 		val name = identifyModule(moduleFolder)
 
 		if (loadedModules.containsKey(name)) {
@@ -100,7 +100,7 @@ class ModuleManager {
 				val variableName = pathParts.get(pathParts.length-2)
 
 				val moduleStorage = settings.getModulesSection().getSection(name, true)
-				val module = new Module(entryJs, variableName, moduleStorage)
+				val module = new Module(name, entryJs, variableName, moduleStorage)
 
 				defaultContextConsole.log("Loading module: " + name)
 				loadedModules.put(name, module)
@@ -157,38 +157,63 @@ class ModuleManager {
 	 */
 	private def void triggerModuleRequire(IConsoleContext context, Module module) {
 		// if same module is already loaded then unload it first
-		triggerModuleUnload(context.jsEnv, module.relativeEntryFilePath, module.variableName)
+		triggerModuleUnload(context.jsEnv, module)
 
 		// set context of module (`this` variable available in `onload`)
 		context.jsEnv.tempArgs.context = module.context
 
 		// load module and leave it as a global variable «name»
-		context.jsEnv.eval('''
-			var «module.variableName» = require("«module.relativeEntryFilePath»")
+		try {
+			context.jsEnv.eval('''
+				var «module.variableName» = require("«module.relativeEntryFilePath»")
 
-			if («module.variableName».onload)
-				«module.variableName».onload.apply(TemporaryArgs.context, null)
-		''')
+				if («module.variableName».onload)
+					«module.variableName».onload.apply(TemporaryArgs.context, null)
+			''')
+		}
+		catch (ScriptAssertError assertion) {
+			defaultContextConsole.error(module.name + " :: module.onload - assertion error: ")
+
+			if (assertion.isError) {
+				defaultContextConsole.error(assertion.text)
+			}
+			else {
+				defaultContextConsole.log(assertion.text)
+			}
+		}
+
 	}
 
 	private def void triggerModuleUnload(Module module) {
 		consoleContextProvider.contexts.forEach[context |
-			triggerModuleUnload(context.jsEnv, module.relativeEntryFilePath, module.variableName)
+			triggerModuleUnload(context.jsEnv, module)
 		]
 	}
 
-	private def void triggerModuleUnload(JavaScriptEnvironment jsEnv, String relativeEntryFilePath, String variableName) {
-		val module = jsEnv.getObject(variableName)
+	private def void triggerModuleUnload(JavaScriptEnvironment jsEnv, Module module) {
+		val moduleObj = jsEnv.getObject(module.variableName)
 
-		if (module != null) {
-			jsEnv.eval('''
-				if («variableName».onunload)
-					«variableName».onunload()
+		if (moduleObj != null) {
+			try {
+				jsEnv.eval('''
+					if («module.variableName».onunload)
+						«module.variableName».onunload()
 
-				delete require.cache["«relativeEntryFilePath.toString»"]
-			''')
+					delete require.cache["«module.relativeEntryFilePath.toString»"]
+				''')
+			}
+			catch (ScriptAssertError assertion) {
+				defaultContextConsole.error(module.name + " :: module.onunload - assertion error: ")
 
-			jsEnv.unbindObject(variableName)
+				if (assertion.isError) {
+					defaultContextConsole.error(assertion.text)
+				}
+				else {
+					defaultContextConsole.log(assertion.text)
+				}
+			}
+
+			jsEnv.unbindObject(module.variableName)
 		}
 	}
 
@@ -208,7 +233,7 @@ class ModuleManager {
 
 		override onContextDestroying(IConsoleContext context) {
 			loadedModules.forEach[name, module |
-				triggerModuleUnload(context.jsEnv, module.relativeEntryFilePath, module.variableName)
+				triggerModuleUnload(context.jsEnv, module)
 			]
 		}
 	}

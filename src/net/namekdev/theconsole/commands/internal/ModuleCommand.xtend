@@ -3,6 +3,7 @@ package net.namekdev.theconsole.commands.internal
 import net.namekdev.theconsole.commands.api.ICommand
 import net.namekdev.theconsole.modules.Module
 import net.namekdev.theconsole.state.api.IConsoleContext
+import net.namekdev.theconsole.scripts.execution.ScriptAssertError
 
 class ModuleCommand implements ICommand {
 	val Module module
@@ -20,14 +21,26 @@ class ModuleCommand implements ICommand {
 		val tmpObjName = module.variableName + '_' + commandName + '_' + System.nanoTime
 		jsEnv.bindObject(tmpObjName, args)
 
-		val ret = jsEnv.eval('''
-			«module.variableName».commands.«commandName».apply(
-				null, [Java.from(«tmpObjName»)]
-			)
-		''')
+		var Object ret = null
+		try {
+			return jsEnv.eval('''
+				«module.variableName».commands.«commandName».apply(
+					null, [Java.from(«tmpObjName»)]
+				)
+			''')
+		}
+		catch (ScriptAssertError assertion) {
+			if (assertion.isError) {
+				executionContext.proxy.error(assertion.text)
+			}
+			else {
+				executionContext.proxy.log(assertion.text)
+			}
 
-		jsEnv.unbindObject(tmpObjName)
-
-		return ret
+			return null
+		}
+		finally {
+			jsEnv.unbindObject(tmpObjName)
+		}
 	}
 }
