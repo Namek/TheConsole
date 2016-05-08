@@ -4,13 +4,13 @@ import javafx.application.Platform
 import javafx.event.EventHandler
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
-import javafx.scene.control.Tab
 import javafx.scene.control.TextField
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.AnchorPane
 import javafx.scene.web.WebView
 import net.namekdev.theconsole.state.api.IConsoleContext
 import net.namekdev.theconsole.view.api.IConsolePromptInput
+import net.namekdev.theconsole.view.utils.WebViewSelectionToClipboard
 
 class ConsoleTab extends RenamableTab {
 	package var IConsoleContext context
@@ -39,6 +39,10 @@ class ConsoleTab extends RenamableTab {
 				}
 			}
 		}
+
+		new WebViewSelectionToClipboard(webView).connect([
+			focusInput()
+		])
 	}
 
 	def focusInput() {
