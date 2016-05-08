@@ -10,6 +10,7 @@ import javafx.scene.layout.AnchorPane
 import javafx.scene.web.WebView
 import net.namekdev.theconsole.state.api.IConsoleContext
 import net.namekdev.theconsole.view.api.IConsolePromptInput
+import net.namekdev.theconsole.view.utils.TextFieldCaretWatcher
 import net.namekdev.theconsole.view.utils.WebViewSelectionToClipboard
 
 class ConsoleTab extends RenamableTab {
@@ -21,6 +22,8 @@ class ConsoleTab extends RenamableTab {
 	@FXML private TextField promptInput
 
 	var EventHandler<KeyEvent> keyPressHandler
+	val TextFieldCaretWatcher promptInputCaretWatcher
+	val WebViewSelectionToClipboard webViewSelectionWatcher
 
 
 	new() {
@@ -40,9 +43,15 @@ class ConsoleTab extends RenamableTab {
 			}
 		}
 
-		new WebViewSelectionToClipboard(webView).connect([
+		promptInputCaretWatcher = new TextFieldCaretWatcher(promptInput)
+		webViewSelectionWatcher = new WebViewSelectionToClipboard(webView, [
 			focusInput()
 		])
+	}
+
+	def void dispose() {
+		promptInputCaretWatcher.dispose()
+		webViewSelectionWatcher.dispose()
 	}
 
 	def focusInput() {

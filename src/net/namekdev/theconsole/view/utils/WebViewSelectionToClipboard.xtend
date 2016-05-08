@@ -15,18 +15,13 @@ class WebViewSelectionToClipboard {
 	var Runnable onTextCopiedHandler
 	var String lastCopiedText = null
 
-	new(WebView web) {
+	new(WebView web, Runnable onTextCopiedHandler) {
 		this.web = web
-	}
-
-	def connect(Runnable onTextCopiedHandler) {
 		web.onMouseReleased = onMouseReleasedHandler
 		this.onTextCopiedHandler = onTextCopiedHandler
-
-		return this
 	}
 
-	def void disconnect() {
+	def void dispose() {
 		web.removeEventHandler(MouseEvent.MOUSE_RELEASED, onMouseReleasedHandler)
 		this.onTextCopiedHandler = null
 	}

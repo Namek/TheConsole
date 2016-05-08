@@ -65,8 +65,9 @@ class ConsoleView extends AnchorPane {
 
 	def closeCurrentTab() {
 		val tab = tabPane.selectionModel.selectedItem as ConsoleTab
-		consoleContextManager.destroyContext(tab.context)
 		tabPane.tabs.remove(tab)
+		consoleContextManager.destroyContext(tab.context)
+		tab.dispose()
 	}
 
 	val ChangeListener<Tab> onSwitchTabHandler = [ov, oldTab, newTab |
