@@ -2,9 +2,6 @@ package net.namekdev.theconsole.state
 
 import java.util.ArrayList
 import java.util.List
-import java.util.concurrent.BlockingQueue
-import java.util.concurrent.LinkedBlockingQueue
-import java.util.function.Consumer
 import javafx.application.Platform
 import net.namekdev.theconsole.commands.CommandLineService
 import net.namekdev.theconsole.commands.CommandManager
@@ -13,12 +10,14 @@ import net.namekdev.theconsole.scripts.JsFilesManager
 import net.namekdev.theconsole.state.api.ConsoleContextListener
 import net.namekdev.theconsole.state.api.IConsoleContext
 import net.namekdev.theconsole.state.api.IConsoleContextManager
+import net.namekdev.theconsole.state.logging.AppLogs
 import net.namekdev.theconsole.utils.Database
 import net.namekdev.theconsole.utils.PathUtils
 import net.namekdev.theconsole.utils.api.IDatabase
 import net.namekdev.theconsole.view.api.IConsoleOutput
 import net.namekdev.theconsole.view.api.IConsolePromptInput
 import net.namekdev.theconsole.view.api.IWindowController
+import rx.Subscription
 
 class AppStateManager implements IConsoleContextManager {
 	JsFilesManager jsFilesManager
@@ -27,38 +26,30 @@ class AppStateManager implements IConsoleContextManager {
 	ModuleManager moduleManager
 	val IWindowController windowController
 
-	var lastContextId = 0 as int
-	var IConsoleContext defaultContext
 	var IConsoleContext currentTabContext
-	var InitializationConsoleContext initializationContext
 	val List<ContextInfo> contexts = new ArrayList<ContextInfo>()
+	val generalLogs = new AppLogs
 
-	val BlockingQueue<Consumer<IConsoleContext>> firstContextTasks = new LinkedBlockingQueue
 	val List<ConsoleContextListener> contextListeners = new ArrayList
+
 
 
 	new(IWindowController windowController) {
 		this.windowController = windowController
-		this.initializationContext = new InitializationConsoleContext()
 
 		database = new Database
 		try {
 			database.load(PathUtils.appSettingsDir + "/settings.db")
 		}
 		catch (RuntimeException exc) {
-			// TODO I wonder if this works
-			this.contextOfDefaultTab.proxy.error(exc.message)
+			generalLogs.error(exc.message)
 		}
 
 		commandManager = new CommandManager(database)
 		moduleManager = new ModuleManager(database, commandManager, this)
 		jsFilesManager = new JsFilesManager(database, this, commandManager, moduleManager)
-
-		firstContextTasks.put[
-			jsFilesManager.init()
-		]
+		jsFilesManager.init()
 	}
-
 
 
 	// management
@@ -74,37 +65,30 @@ class AppStateManager implements IConsoleContextManager {
 			contextListeners.forEach[
 				onNewContextCreated(newContext)
 			]
-		]
 
-		if (initializationContext != null) {
-			val entries = initializationContext.entries
-			initializationContext = null
-			defaultContext = newContext
-
-			for (entry : entries) {
-				if (entry.isError) {
-					newContext.output.addErrorEntry(entry.text)
-				}
-				else {
-					newContext.output.addTextEntry(entry.text)
-				}
+			// if this is a first context, then display general logs to it's output
+			if (contexts.size == 1) {
+				info.subscribeToLogs(generalLogs)
 			}
-
-			Platform.runLater [
-				firstContextTasks.forEach[
-					accept(newContext)
-				]
-			]
-		}
+		]
 
 		return newContext
 	}
 
 	override destroyContext(IConsoleContext context) {
+		contextListeners.forEach[
+			onContextDestroying(context)
+		]
+
 		val info = contexts.findFirst[info|info.context == context]
+		contexts.remove(info)
 
 		info.commandLineService.dispose()
-		(info.context as ConsoleContext).switchContext(contextOfDefaultTab)
+
+		if (info.unsubscribeLogs()) {
+			// find new Context for general logs
+			contexts.get(0).subscribeToLogs(generalLogs)
+		}
 	}
 
 	override setCurrentTabByContext(IConsoleContext context) {
@@ -114,26 +98,45 @@ class AppStateManager implements IConsoleContextManager {
 	private static class ContextInfo {
 		public val IConsoleContext context
 		public val CommandLineService commandLineService
+		public var Subscription logsSubscription
 
 		new(IConsoleContext context, CommandLineService commandLineService) {
 			this.context = context
 			this.commandLineService = commandLineService
+		}
+
+		def void subscribeToLogs(AppLogs generalLogs) {
+			logsSubscription = generalLogs.observable.subscribe([log |
+				if (log.isError)
+					context.output.addErrorEntry(log.text)
+				else
+					context.output.addTextEntry(log.text)
+			])
+		}
+
+		def boolean unsubscribeLogs() {
+			val isSubscribed = logsSubscription != null
+			if (isSubscribed) {
+				logsSubscription.unsubscribe()
+				logsSubscription = null
+			}
+			return isSubscribed
 		}
 	}
 
 
 	// provider
 
-	override getContextOfDefaultTab() {
-		return if (defaultContext != null) defaultContext else initializationContext
-	}
-
 	override getContextForCurrentTab() {
-		return if (currentTabContext != null) currentTabContext else getContextOfDefaultTab()
+		currentTabContext
 	}
 
 	override getContexts() {
 		return contexts.map[info|info.context]
+	}
+
+	override getGeneralLogs() {
+		generalLogs
 	}
 
 	override registerContextListener(ConsoleContextListener listener) {

@@ -59,7 +59,7 @@ class JsFilesManager {
 	def void init() {
 		if (!Files.isDirectory(scriptsWatchDir)) {
 			val path = scriptsWatchDir.toAbsolutePath().toString()
-			defaultContextConsole.log("No scripts folder found, creating a new one: " + path)
+			logs.log("No scripts folder found, creating a new one: " + path)
 			new File(path).mkdirs()
 		}
 
@@ -72,12 +72,12 @@ class JsFilesManager {
 			watcher.start()
 		}
 		catch (IOException exc) {
-			defaultContextConsole.error(exc.toString())
+			logs.error(exc.toString())
 		}
 	}
 
-	def private ConsoleProxy getDefaultContextConsole() {
-		return consoleContextProvider.contextOfDefaultTab.proxy
+	def private getLogs() {
+		return consoleContextProvider.generalLogs
 	}
 
 	def private createScriptStorage(String name) {
@@ -131,7 +131,6 @@ class JsFilesManager {
 		}
 
 		val scriptName = pathToScriptName(path)
-		val console = defaultContextConsole
 
 		try {
 			var code = new String(Files.readAllBytes(path), StandardCharsets.UTF_8)
@@ -141,18 +140,18 @@ class JsFilesManager {
 			var script = scripts.get(scriptName)
 
 			if (script == null) {
-				console.log("Loading script: " + scriptName)
+				logs.log("Loading script: " + scriptName)
 				script = new ScriptCommand(scriptName, code, createScriptStorage(scriptName))
 				scripts.put(scriptName, script)
 				commandManager.put(scriptName, script)
 			}
 			else {
-				console.log("Reloading script: " + scriptName)
+				logs.log("Reloading script: " + scriptName)
 				script.code = code
 			}
 		}
 		catch (IOException exc) {
-			console.error(exc.toString())
+			logs.error(exc.toString())
 		}
 	}
 

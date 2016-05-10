@@ -1,14 +1,12 @@
 package net.namekdev.theconsole.state
 
-import java.io.IOException
-import java.io.OutputStream
-import java.io.PrintWriter
 import java.util.function.BiConsumer
 import net.namekdev.theconsole.scripts.ConsoleProxy
 import net.namekdev.theconsole.scripts.execution.JavaScriptEnvironment
 import net.namekdev.theconsole.scripts.execution.JsUtilsProvider
 import net.namekdev.theconsole.state.api.IConsoleContext
 import net.namekdev.theconsole.state.api.IConsoleContextManager
+import net.namekdev.theconsole.state.logging.AppLogs
 import net.namekdev.theconsole.view.api.IConsoleOutput
 import net.namekdev.theconsole.view.api.IConsolePromptInput
 import net.namekdev.theconsole.view.api.IWindowController
@@ -22,7 +20,6 @@ class ConsoleContext implements IConsoleContext {
 	private var IConsolePromptInput input
 	private var IConsoleOutput output
 	private var ConsoleProxy proxy
-	private var PrintWriter errorStream
 	private var JsUtilsProvider jsUtils
 	private var JavaScriptEnvironment jsEnv
 
@@ -39,20 +36,6 @@ class ConsoleContext implements IConsoleContext {
 		this.input = input
 		this.output = consoleOutput
 		this.proxy = new ConsoleProxy(consoleOutput, windowController)
-
-		errorStream = new PrintWriter(new OutputStream() {
-			StringBuilder sb = new StringBuilder();
-
-			override write(int c) throws IOException {
-				if (c == '\n') {
-					consoleOutput.addErrorEntry(sb.toString())
-					sb = new StringBuilder()
-				}
-				else {
-					sb.append(c as char)
-				}
-			}
-		})
 
 		jsUtils = new JsUtilsProvider(this)
 		jsEnv = createJsEnvironment()
@@ -76,15 +59,6 @@ class ConsoleContext implements IConsoleContext {
 		})
 
 		return jsEnv
-	}
-
-	def switchContext(IConsoleContext context) {
-		this.input = context.input
-		this.output = context.output
-		this.proxy = context.proxy
-		this.errorStream = context.errorStream
-		this.jsUtils = context.jsUtils
-		this.jsEnv = context.jsEnv
 	}
 
 	/**
@@ -114,10 +88,6 @@ class ConsoleContext implements IConsoleContext {
 
 	override getProxy() {
 		return this.proxy
-	}
-
-	override getErrorStream() {
-		return this.errorStream
 	}
 
 	override getJsUtils() {
