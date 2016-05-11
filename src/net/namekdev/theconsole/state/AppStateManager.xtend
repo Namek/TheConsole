@@ -19,6 +19,8 @@ import net.namekdev.theconsole.utils.api.IDatabase
 import net.namekdev.theconsole.view.api.IConsoleOutput
 import net.namekdev.theconsole.view.api.IConsolePromptInput
 import net.namekdev.theconsole.view.api.IWindowController
+import rx.Observable
+import net.namekdev.theconsole.state.logging.AppLogs
 
 class AppStateManager implements IConsoleContextManager {
 	JsFilesManager jsFilesManager
@@ -32,9 +34,11 @@ class AppStateManager implements IConsoleContextManager {
 	var IConsoleContext currentTabContext
 	var InitializationConsoleContext initializationContext
 	val List<ContextInfo> contexts = new ArrayList<ContextInfo>()
+	val generalLogs = new AppLogs
 
 	val BlockingQueue<Consumer<IConsoleContext>> firstContextTasks = new LinkedBlockingQueue
 	val List<ConsoleContextListener> contextListeners = new ArrayList
+
 
 
 	new(IWindowController windowController) {
@@ -46,8 +50,7 @@ class AppStateManager implements IConsoleContextManager {
 			database.load(PathUtils.appSettingsDir + "/settings.db")
 		}
 		catch (RuntimeException exc) {
-			// TODO I wonder if this works
-			this.contextOfDefaultTab.proxy.error(exc.message)
+			generalLogs.error(exc.message)
 		}
 
 		commandManager = new CommandManager(database)

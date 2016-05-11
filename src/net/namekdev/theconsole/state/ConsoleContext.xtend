@@ -22,7 +22,7 @@ class ConsoleContext implements IConsoleContext {
 	private var IConsolePromptInput input
 	private var IConsoleOutput output
 	private var ConsoleProxy proxy
-	private var PrintWriter errorStream
+//	private var PrintWriter errorStream
 	private var JsUtilsProvider jsUtils
 	private var JavaScriptEnvironment jsEnv
 
@@ -40,19 +40,19 @@ class ConsoleContext implements IConsoleContext {
 		this.output = consoleOutput
 		this.proxy = new ConsoleProxy(consoleOutput, windowController)
 
-		errorStream = new PrintWriter(new OutputStream() {
-			StringBuilder sb = new StringBuilder();
-
-			override write(int c) throws IOException {
-				if (c == '\n') {
-					consoleOutput.addErrorEntry(sb.toString())
-					sb = new StringBuilder()
-				}
-				else {
-					sb.append(c as char)
-				}
-			}
-		})
+//		errorStream = new PrintWriter(new OutputStream() {
+//			StringBuilder sb = new StringBuilder();
+//
+//			override write(int c) throws IOException {
+//				if (c == '\n') {
+//					consoleOutput.addErrorEntry(sb.toString())
+//					sb = new StringBuilder()
+//				}
+//				else {
+//					sb.append(c as char)
+//				}
+//			}
+//		})
 
 		jsUtils = new JsUtilsProvider(this)
 		jsEnv = createJsEnvironment()
@@ -82,7 +82,7 @@ class ConsoleContext implements IConsoleContext {
 		this.input = context.input
 		this.output = context.output
 		this.proxy = context.proxy
-		this.errorStream = context.errorStream
+//		this.errorStream = context.errorStream
 		this.jsUtils = context.jsUtils
 		this.jsEnv = context.jsEnv
 	}
@@ -114,10 +114,6 @@ class ConsoleContext implements IConsoleContext {
 
 	override getProxy() {
 		return this.proxy
-	}
-
-	override getErrorStream() {
-		return this.errorStream
 	}
 
 	override getJsUtils() {

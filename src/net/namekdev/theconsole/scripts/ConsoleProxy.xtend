@@ -25,9 +25,9 @@ class ConsoleProxy {
 		consoleOutput.addTextEntry(text, colorHex)
 	}
 
-	def void error(String text) {
-		consoleOutput.addErrorEntry(text)
-	}
+//	def void error(String text) {
+//		consoleOutput.addErrorEntry(text)
+//	}
 
 	def void clear() {
 		consoleOutput.clear()

@@ -28,10 +28,6 @@ class InitializationConsoleContext implements IConsoleContext {
 		return deferredOutputProxy
 	}
 
-	override getErrorStream() {
-		throw new UnsupportedOperationException(CommonInitError)
-	}
-
 	override getJsUtils() {
 		throw new UnsupportedOperationException(CommonInitError)
 	}

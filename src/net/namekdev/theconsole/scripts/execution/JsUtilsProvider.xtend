@@ -14,7 +14,7 @@ import net.namekdev.theconsole.utils.AudioFilePlayer
 import net.namekdev.theconsole.utils.api.IAudioFilePlayer
 
 class JsUtilsProvider {
-	private var PrintWriter errorStream
+//	private var PrintWriter errorStream
 
 	public final IAudioFilePlayer audioFilePlayer = new AudioFilePlayer
 
