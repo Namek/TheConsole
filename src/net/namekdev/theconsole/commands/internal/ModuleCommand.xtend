@@ -31,10 +31,10 @@ class ModuleCommand implements ICommand {
 		}
 		catch (ScriptAssertError assertion) {
 			if (assertion.isError) {
-				executionContext.proxy.error(assertion.text)
+				executionContext.generalLogs.error(assertion.text)
 			}
 			else {
-				executionContext.proxy.log(assertion.text)
+				executionContext.generalLogs.log(assertion.text)
 			}
 
 			return null

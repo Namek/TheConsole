@@ -32,18 +32,15 @@ class AppStateManager implements IConsoleContextManager {
 	var lastContextId = 0 as int
 	var IConsoleContext defaultContext
 	var IConsoleContext currentTabContext
-	var InitializationConsoleContext initializationContext
 	val List<ContextInfo> contexts = new ArrayList<ContextInfo>()
 	val generalLogs = new AppLogs
 
-	val BlockingQueue<Consumer<IConsoleContext>> firstContextTasks = new LinkedBlockingQueue
 	val List<ConsoleContextListener> contextListeners = new ArrayList
 
 
 
 	new(IWindowController windowController) {
 		this.windowController = windowController
-		this.initializationContext = new InitializationConsoleContext()
 
 		database = new Database
 		try {
@@ -57,9 +54,12 @@ class AppStateManager implements IConsoleContextManager {
 		moduleManager = new ModuleManager(database, commandManager, this)
 		jsFilesManager = new JsFilesManager(database, this, commandManager, moduleManager)
 
-		firstContextTasks.put[
-			jsFilesManager.init()
-		]
+
+
+
+		jsFilesManager.init()
+
+
 	}
 
 
@@ -67,7 +67,7 @@ class AppStateManager implements IConsoleContextManager {
 	// management
 
 	override createContext(IConsolePromptInput input, IConsoleOutput output) {
-		val newContext = new ConsoleContext(windowController, input, output)
+		val newContext = new ConsoleContext(windowController, input, output, getGeneralLogs)
 		val commandLineService = new CommandLineService(newContext, commandManager)
 
 		val info = new ContextInfo(newContext, commandLineService)
@@ -79,7 +79,7 @@ class AppStateManager implements IConsoleContextManager {
 			]
 		]
 
-		if (initializationContext != null) {
+		/*if (initializationContext != null) {
 			val entries = initializationContext.entries
 			initializationContext = null
 			defaultContext = newContext
@@ -92,13 +92,7 @@ class AppStateManager implements IConsoleContextManager {
 					newContext.output.addTextEntry(entry.text)
 				}
 			}
-
-			Platform.runLater [
-				firstContextTasks.forEach[
-					accept(newContext)
-				]
-			]
-		}
+		}*/
 
 		return newContext
 	}
@@ -128,7 +122,7 @@ class AppStateManager implements IConsoleContextManager {
 	// provider
 
 	override getContextOfDefaultTab() {
-		return if (defaultContext != null) defaultContext else initializationContext
+		defaultContext
 	}
 
 	override getContextForCurrentTab() {
@@ -137,6 +131,10 @@ class AppStateManager implements IConsoleContextManager {
 
 	override getContexts() {
 		return contexts.map[info|info.context]
+	}
+
+	override getGeneralLogs() {
+		generalLogs
 	}
 
 	override registerContextListener(ConsoleContextListener listener) {

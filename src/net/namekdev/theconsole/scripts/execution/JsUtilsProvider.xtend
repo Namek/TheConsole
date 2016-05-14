@@ -4,6 +4,7 @@ import java.awt.Desktop
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
+import java.io.OutputStream
 import java.io.PrintWriter
 import java.net.HttpURLConnection
 import java.net.URI
@@ -14,13 +15,25 @@ import net.namekdev.theconsole.utils.AudioFilePlayer
 import net.namekdev.theconsole.utils.api.IAudioFilePlayer
 
 class JsUtilsProvider {
-//	private var PrintWriter errorStream
+	private var PrintWriter errorStream
 
 	public final IAudioFilePlayer audioFilePlayer = new AudioFilePlayer
 
 
 	new(ConsoleContext consoleContext) {
-		this.errorStream = consoleContext.errorStream
+		this.errorStream = new PrintWriter(new OutputStream() {
+			var sb = new StringBuilder()
+
+			override write(int c) throws IOException {
+				if (c == '\n') {
+					consoleContext.output.addErrorEntry(sb.toString)
+					sb = new StringBuilder
+				}
+				else {
+					sb.append(c as char)
+				}
+			}
+		})
 	}
 
 	/**
