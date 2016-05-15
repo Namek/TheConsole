@@ -39,6 +39,9 @@ class ConsoleApp implements NativeKeyListener {
 		GlobalScreen.addNativeKeyListener(this)
 	}
 
+	def void show() {
+		windowController.visible = true
+	}
 
 	override nativeKeyPressed(NativeKeyEvent evt) {
 		if (isConsoleToggleEvent(evt)) {

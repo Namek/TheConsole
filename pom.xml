@@ -99,6 +99,13 @@
 			<version>1.1.5</version>
 		</dependency>
 		<dependency>
+			<groupId>it.sauronsoftware</groupId>
+			<artifactId>junique</artifactId>
+			<version>1.0.4</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/junique-1.0.4.jar</systemPath>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.10</version>
