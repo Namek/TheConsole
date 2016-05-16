@@ -106,6 +106,13 @@
 			<systemPath>${project.basedir}/lib/junique-1.0.4.jar</systemPath>
 		</dependency>
 		<dependency>
+			<groupId>com.pepperonas</groupId>
+			<artifactId>fxiconics</artifactId>
+			<version>0.0.5</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/fxiconics-0.0.5-jfx.jar</systemPath>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.10</version>

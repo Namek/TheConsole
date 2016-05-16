@@ -1,10 +1,14 @@
 package net.namekdev.theconsole.state
 
+import com.google.common.eventbus.Subscribe
+import java.awt.Desktop
 import java.util.ArrayList
 import java.util.List
 import javafx.application.Platform
 import net.namekdev.theconsole.commands.CommandLineService
 import net.namekdev.theconsole.commands.CommandManager
+import net.namekdev.theconsole.events.Events
+import net.namekdev.theconsole.events.ScriptsFolderClickEvent
 import net.namekdev.theconsole.modules.ModuleManager
 import net.namekdev.theconsole.scripts.JsFilesManager
 import net.namekdev.theconsole.state.api.ConsoleContextListener
@@ -37,6 +41,8 @@ class AppStateManager implements IConsoleContextManager {
 	new(IWindowController windowController) {
 		this.windowController = windowController
 
+		Events.register(this)
+
 		database = new Database
 		try {
 			database.load(PathUtils.appSettingsDir + "/settings.db")
@@ -49,6 +55,12 @@ class AppStateManager implements IConsoleContextManager {
 		moduleManager = new ModuleManager(database, commandManager, this)
 		jsFilesManager = new JsFilesManager(database, this, commandManager, moduleManager)
 		jsFilesManager.init()
+	}
+
+	@Subscribe()
+	def void onOpenScriptFolder(ScriptsFolderClickEvent evt) {
+		windowController.visible = false
+		Desktop.desktop.open(PathUtils.scriptsDir.toFile)
 	}
 
 

@@ -11,7 +11,10 @@ import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
+import javafx.scene.input.MouseEvent
 import javafx.scene.layout.AnchorPane
+import net.namekdev.theconsole.events.Events
+import net.namekdev.theconsole.events.ScriptsFolderClickEvent
 import net.namekdev.theconsole.state.api.IConsoleContextManager
 
 class ConsoleView extends AnchorPane {
@@ -35,6 +38,18 @@ class ConsoleView extends AnchorPane {
 		tabPane.getSelectionModel().selectedItemProperty.addListener(onSwitchTabHandler)
 
 		addEventHandler(KeyEvent.KEY_PRESSED, onKeyPressHandler)
+
+
+		val btnOpenFolder = new ScriptsFolderButton()
+		btnOpenFolder.layoutY = 5
+		widthProperty.addListener [
+			btnOpenFolder.layoutX = width - btnOpenFolder.width - 10
+		]
+		children.add(btnOpenFolder)
+
+		btnOpenFolder.addEventHandler(MouseEvent.MOUSE_CLICKED, [
+			Events.post(new ScriptsFolderClickEvent(btnOpenFolder))
+		])
 	}
 
 	def createTab() {
