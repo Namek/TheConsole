@@ -6,6 +6,7 @@ import java.awt.Robot
 import java.awt.event.InputEvent
 import javax.swing.JFrame
 import net.namekdev.theconsole.view.api.IWindowController
+import javafx.stage.Screen
 
 package class ConsoleAppWindowController implements IWindowController {
 	val JFrame window
@@ -79,4 +80,22 @@ package class ConsoleAppWindowController implements IWindowController {
 		window.opacity = opacity
 	}
 
+	def void setScreen(int index) {
+		val screens = Screen.screens
+
+		if (screens.size > index+1) {
+			return
+		}
+
+		val screen = Screen.screens.get(index)
+		screen.bounds
+
+		// TODO change position and resolution
+
+//		screen.bounds.
+	}
+
+	def int getScreenCount() {
+		Screen.screens.size
+	}
 }
