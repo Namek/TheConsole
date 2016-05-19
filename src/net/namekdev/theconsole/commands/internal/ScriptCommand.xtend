@@ -20,4 +20,10 @@ class ScriptCommand implements ICommand {
 	override run(IConsoleContext executionContext, String[] args) {
 		return executionContext.runJs(this.code, args, context)
 	}
+
+	override completeArgument(String testArgument) {
+		// TODO
+		throw new UnsupportedOperationException("TODO: think of some completion inside scripts")
+	}
+
 }

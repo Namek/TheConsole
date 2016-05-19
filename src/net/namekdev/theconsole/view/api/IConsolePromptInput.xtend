@@ -6,6 +6,7 @@ import javafx.scene.input.KeyEvent
 interface IConsolePromptInput {
 	def String getText()
 	def void setText(String text)
+	def int getCursorPosition()
 	def void setCursorPosition(int pos)
 
 	def void setKeyPressHandler(EventHandler<KeyEvent> handler)

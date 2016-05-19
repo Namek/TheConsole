@@ -70,6 +70,10 @@ class ConsoleTab extends RenamableTab {
 			]
 		}
 
+		override getCursorPosition() {
+			return promptInput.caretPosition
+		}
+
 		override setCursorPosition(int pos) {
 			Platform.runLater [
 				promptInput.positionCaret(pos)

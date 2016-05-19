@@ -12,6 +12,7 @@ import java.net.URL
 import jdk.nashorn.internal.objects.NativeArray
 import net.namekdev.theconsole.state.ConsoleContext
 import net.namekdev.theconsole.utils.AudioFilePlayer
+import net.namekdev.theconsole.utils.PathUtils
 import net.namekdev.theconsole.utils.api.IAudioFilePlayer
 
 class JsUtilsProvider {
@@ -191,5 +192,9 @@ class JsUtilsProvider {
 		if (!condition) {
 			throw new ScriptAssertError(text, false)
 		}
+	}
+
+	def String[] completePath(String absolutePath) {
+		return PathUtils.tryCompletePath(absolutePath)
 	}
 }

@@ -1,6 +1,7 @@
 package net.namekdev.theconsole.commands
 
 import java.util.ArrayList
+import java.util.regex.Matcher
 import java.util.regex.Pattern
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
@@ -8,6 +9,7 @@ import net.namekdev.theconsole.commands.api.ICommand
 import net.namekdev.theconsole.commands.api.ICommandLineHandler
 import net.namekdev.theconsole.scripts.execution.ScriptAssertError
 import net.namekdev.theconsole.state.api.IConsoleContext
+import net.namekdev.theconsole.utils.PathUtils
 import net.namekdev.theconsole.view.api.IConsoleOutput
 import net.namekdev.theconsole.view.api.IConsoleOutputEntry
 import net.namekdev.theconsole.view.api.IConsolePromptInput
@@ -52,7 +54,7 @@ class CommandLineHandler implements ICommandLineHandler {
 					tryCompleteCommandName()
 				}
 				else {
-					// TODO try to complete command parameters
+					tryCompletePathArgument()
 				}
 
 				evt.consume()
@@ -121,12 +123,20 @@ class CommandLineHandler implements ICommandLineHandler {
 	}
 
 	def void setInput(String text) {
+		setInput(text, -1)
+	}
+
+	def void setInput(String text, int caretPos) {
 		consolePrompt.setText(text)
-		consolePrompt.setCursorPosition(text.length())
+		consolePrompt.setCursorPosition(if (caretPos >= 0) caretPos else text.length())
 	}
 
 	def String getInput() {
 		return consolePrompt.getText()
+	}
+
+	def int getInputCursorPosition() {
+		return consolePrompt.cursorPosition
 	}
 
 	def int countSpacesInInput() {
@@ -225,6 +235,69 @@ class CommandLineHandler implements ICommandLineHandler {
 				// modify existing text entry
 				lastAddedEntry.setText(sb.toString())
 			}
+		}
+	}
+
+	private def void tryCompletePathArgument() {
+		val line = getInput()
+		val caretPos = inputCursorPosition
+
+		// we will tokenize and gather everything before caret position
+		val matcher = paramRegex.matcher(line)
+		matcher.region(0, caretPos)
+
+		val tokens = new ArrayList<ArgToken>()
+
+		// first token is supposed to be a command name but don't have to be
+		matcher.find()
+		val commandName = matcher.group
+		val command = commandManager.get(commandName)
+		val isCommand = command != null
+
+		if (!isCommand) {
+			tokens.add(new ArgToken(matcher))
+		}
+
+		while (matcher.find()) {
+			tokens.add(new ArgToken(matcher))
+		}
+
+		var lastTokensCount = 1
+		val completions = new ArrayList<String>
+		var ArgToken token = null
+		while (completions.size == 0 && lastTokensCount <= tokens.size) {
+			token = tokens.stream
+				.skip(tokens.size - lastTokensCount)
+				.findFirst.get
+
+			val testArg = line.substring(token.pos, caretPos)
+
+			if (isCommand) {
+				// first ask command's owner (a module, probably) whether it can complete the argument
+				completions.addAll(command.completeArgument(testArg))
+			}
+
+			if (completions.length == 0) {
+				// no one could complete this argument, maybe it's just a full path?
+				completions.addAll(PathUtils.tryCompletePath(testArg))
+			}
+
+			lastTokensCount++
+		}
+
+		if (completions.size == 1) {
+			val sb = new StringBuilder
+			sb.append(line.substring(0, token.pos))
+			sb.append(completions.get(0))
+			val newCaretPos = sb.length
+			sb.append(line.substring(caretPos))
+			setInput(sb.toString, newCaretPos)
+		}
+		else if (completions.size > 0) {
+			// just display as text (for now)
+			consoleOutput.addInputEntry(completions.join('\n'))
+
+			// TODO use completions (there may be multiple of them!)
 		}
 	}
 
@@ -360,5 +433,24 @@ class CommandLineHandler implements ICommandLineHandler {
 		}
 
 		return names.get(0).substring(0, charIndex)
+	}
+
+
+	private static class ArgToken {
+		String text
+		int pos
+		int end
+		int len
+
+		new(Matcher m) {
+			text = m.group
+			pos = m.start
+			end = m.end
+			len = end - pos
+		}
+
+		override toString() {
+			return #[text, pos, end].toString
+		}
 	}
 }

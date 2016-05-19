@@ -42,4 +42,11 @@ class ModuleCommand implements ICommand {
 			jsEnv.unbindObject(tmpObjName)
 		}
 	}
+
+	override completeArgument(String testArgument) {
+		// TODO try to call command's _completeArgument() or module's global _completeArgument()
+		return #[]
+//		throw new UnsupportedOperationException("TODO: auto-generated method stub")
+	}
+
 }
