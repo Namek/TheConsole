@@ -2,8 +2,10 @@ package net.namekdev.theconsole.events
 
 import com.google.common.eventbus.EventBus
 
-interface Events {
+class Events {
 	static val bus = new EventBus
+
+	private new() { }
 
 	static def post(Event evt) {
 		bus.post(evt)
