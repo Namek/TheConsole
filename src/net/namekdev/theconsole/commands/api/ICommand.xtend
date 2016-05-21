@@ -4,5 +4,5 @@ import net.namekdev.theconsole.state.api.IConsoleContext
 
 interface ICommand {
 	def Object run(IConsoleContext executionContext, String[] args)
-	def String[] completeArgument(String testArgument)
+	def String[] completeArgument(IConsoleContext executionContext, String testArgument)
 }

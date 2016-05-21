@@ -15,7 +15,7 @@ class ExecCommand implements ICommand {
 		return filepath
 	}
 
-	override completeArgument(String testArgument) {
+	override completeArgument(IConsoleContext executionContext, String testArgument) {
 		return PathUtils.tryCompletePath(testArgument)
 	}
 }

@@ -28,6 +28,8 @@ import static java.nio.file.FileVisitResult.*
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY
+import java.util.regex.Pattern
+import java.util.Scanner
 
 class JsFilesManager {
 	final String SCRIPT_FILE_EXTENSION = "js"
@@ -42,6 +44,11 @@ class JsFilesManager {
 	private PathMatcher scriptExtensionMatcher
 
 	Map<String, ScriptCommand> scripts = new TreeMap
+
+	val providesRegex = Pattern.compile(
+		'''///\s*provides:\s*((\w+),?)+'''
+//		Pattern.UNICODE_CHARACTER_CLASS
+	)
 
 
 
@@ -135,20 +142,30 @@ class JsFilesManager {
 		try {
 			var code = new String(Files.readAllBytes(path), StandardCharsets.UTF_8)
 
-			// TODO try to pre-compile script for error-check
+			val features = new ArrayList<String>
+			val scanner = new Scanner(code)
+			val line = scanner.nextLine
+			val m = providesRegex.matcher(line)
+			m.region(0, line.length)
+
+			for (var i = 1; m.find && i <= m.groupCount; i+=2) {
+				val featureName = m.group(i)
+				features.add(featureName)
+			}
 
 			var script = scripts.get(scriptName)
 
 			if (script == null) {
 				logs.log("Loading script: " + scriptName)
-				script = new ScriptCommand(scriptName, code, createScriptStorage(scriptName))
+				script = new ScriptCommand(scriptName,  createScriptStorage(scriptName))
 				scripts.put(scriptName, script)
 				commandManager.put(scriptName, script)
 			}
 			else {
 				logs.log("Reloading script: " + scriptName)
-				script.code = code
 			}
+
+			script.setup(code, features)
 		}
 		catch (IOException exc) {
 			logs.error(exc.toString())

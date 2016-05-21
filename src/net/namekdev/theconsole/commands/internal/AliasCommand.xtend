@@ -87,7 +87,7 @@ class AliasCommand implements ICommand {
 		return null
 	}
 
-	override completeArgument(String testArgument) {
+	override completeArgument(IConsoleContext executionContext, String testArgument) {
 		throw new UnsupportedOperationException("TODO: try to complete aliases?")
 	}
 }

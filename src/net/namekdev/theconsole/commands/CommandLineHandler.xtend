@@ -50,11 +50,21 @@ class CommandLineHandler implements ICommandLineHandler {
 	override handle(KeyEvent evt) {
 		switch (evt.code) {
 			case KeyCode.TAB: {
+				var enableArgumentCompletion = false
+
 				if (countSpacesInInput() == 0) {
-					tryCompleteCommandName()
+					val completions = tryCompleteCommandName()
+					if (completions.size == 1) {
+						// add space
+						setInput(completions.get(0) + ' ')
+					}
 				}
 				else {
-					tryCompletePathArgument()
+					enableArgumentCompletion = true
+				}
+
+				if (enableArgumentCompletion) {
+					tryCompleteArgument()
 				}
 
 				evt.consume()
@@ -152,7 +162,7 @@ class CommandLineHandler implements ICommandLineHandler {
 		return count
 	}
 
-	def void tryCompleteCommandName() {
+	def tryCompleteCommandName() {
 		val namePart = getInput()
 
 		// TODO search between aliases too
@@ -165,8 +175,11 @@ class CommandLineHandler implements ICommandLineHandler {
 		if (commandNames.size == 1) {
 			// complete to this one
 			val commandName = commandNames.get(0)
-			setInput(commandName)
-			lastAddedEntry = null
+
+			if (!commandName.equals(namePart)) {
+				setInput(commandName)
+				lastAddedEntry = null
+			}
 		}
 
 		// Complete to the common part and show options to continue
@@ -236,9 +249,11 @@ class CommandLineHandler implements ICommandLineHandler {
 				lastAddedEntry.setText(sb.toString())
 			}
 		}
+
+		return commandNames
 	}
 
-	private def void tryCompletePathArgument() {
+	private def void tryCompleteArgument() {
 		val line = getInput()
 		val caretPos = inputCursorPosition
 
@@ -265,7 +280,15 @@ class CommandLineHandler implements ICommandLineHandler {
 		var lastTokensCount = 1
 		val completions = new ArrayList<String>
 		var ArgToken token = null
-		while (completions.size == 0 && lastTokensCount <= tokens.size) {
+
+		if (tokens.size == 0) {
+			val suggestions = command.completeArgument(consoleContext, '-noargs')
+
+			if (suggestions != null) {
+				completions.addAll(suggestions)
+			}
+		}
+		else while (completions.size == 0 && lastTokensCount <= tokens.size) {
 			token = tokens.stream
 				.skip(tokens.size - lastTokensCount)
 				.findFirst.get
@@ -274,7 +297,11 @@ class CommandLineHandler implements ICommandLineHandler {
 
 			if (isCommand) {
 				// first ask command's owner (a module, probably) whether it can complete the argument
-				completions.addAll(command.completeArgument(testArg))
+				val suggestions = command.completeArgument(consoleContext, testArg)
+
+				if (suggestions != null) {
+					completions.addAll(suggestions)
+				}
 			}
 
 			if (completions.length == 0) {
@@ -287,7 +314,14 @@ class CommandLineHandler implements ICommandLineHandler {
 
 		if (completions.size == 1) {
 			val sb = new StringBuilder
-			sb.append(line.substring(0, token.pos))
+
+			if (token != null) {
+				sb.append(line.substring(0, token.pos))
+			}
+			else {
+				sb.append(line)
+			}
+
 			sb.append(completions.get(0))
 			val newCaretPos = sb.length
 			sb.append(line.substring(caretPos))

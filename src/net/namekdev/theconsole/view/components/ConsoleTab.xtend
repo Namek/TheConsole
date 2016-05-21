@@ -60,23 +60,38 @@ class ConsoleTab extends RenamableTab {
 
 
 	public val consolePromptInput = new IConsolePromptInput {
+		volatile var boolean hasTextToSet = false
+		volatile var boolean hasCursorPosToSet = false
+		var String tmpTextToSet
+		var int tmpCursorPosToSet
+
 		override getText() {
-			return promptInput.text
+			return if (hasTextToSet) tmpTextToSet else promptInput.text
 		}
 
 		override setText(String text) {
+			hasTextToSet = true
+			tmpTextToSet = text
+
 			Platform.runLater [
 				promptInput.text = text
+				hasTextToSet = false
+				tmpTextToSet = null
 			]
 		}
 
 		override getCursorPosition() {
-			return promptInput.caretPosition
+			return if (hasCursorPosToSet) tmpCursorPosToSet else promptInput.caretPosition
 		}
 
 		override setCursorPosition(int pos) {
+			hasCursorPosToSet = true
+			tmpCursorPosToSet = pos
+
 			Platform.runLater [
 				promptInput.positionCaret(pos)
+				hasCursorPosToSet = false
+				tmpCursorPosToSet = -1
 			]
 		}
 

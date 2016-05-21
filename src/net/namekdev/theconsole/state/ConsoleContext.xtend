@@ -68,7 +68,11 @@ class ConsoleContext implements IConsoleContext {
 		jsEnv.tempArgs.args = args
 		jsEnv.tempArgs.context = context
 
-		return runUnscopedJs("(function(args, Storage) {" + code + "})(Java.from(TemporaryArgs.args), TemporaryArgs.context.Storage)")
+		return runUnscopedJs(
+			"(function(args, Storage, argToComplete) {"
+			+ code +
+			"})(Java.from(TemporaryArgs.args), TemporaryArgs.context.Storage, TemporaryArgs.context.argToComplete)"
+		)
 	}
 
 	/**

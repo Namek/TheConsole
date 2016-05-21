@@ -43,7 +43,7 @@ class ModuleCommand implements ICommand {
 		}
 	}
 
-	override completeArgument(String testArgument) {
+	override completeArgument(IConsoleContext executionContext, String testArgument) {
 		// TODO try to call command's _completeArgument() or module's global _completeArgument()
 		return #[]
 //		throw new UnsupportedOperationException("TODO: auto-generated method stub")
