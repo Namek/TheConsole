@@ -35,7 +35,10 @@ class ScriptCommand implements ICommand {
 			context.argToComplete = testArgument
 			val ret = executionContext.runJs(code, null, context)
 
-			if (ret instanceof String) {
+			if (ret instanceof String[]) {
+				return ret
+			}
+			else if (ret instanceof String) {
 				val String[] arr = newArrayOfSize(1)
 				arr.set(0, ret as String)
 				return arr

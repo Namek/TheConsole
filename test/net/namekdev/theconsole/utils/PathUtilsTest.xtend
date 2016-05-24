@@ -38,7 +38,7 @@ class PathUtilsTest {
 		// mock: return canonical path (with big 'C')
 		mockNewFileWithAbsolutePath(mockFileDirC, 'c:', 'Windows', expectedCompletion)
 
-		val suggestions = PathUtils.tryCompletePath(inputPath)
+		val suggestions = PathUtils.suggestPathCompletion(inputPath)
 		assertEquals(1, suggestions.size)
 		expectedCompletion.assertEquals(suggestions.get(0))
 	}
@@ -52,7 +52,7 @@ class PathUtilsTest {
 		val mockDirC = mockNewFileWithExistance(inputPath, true)
 		when(mockDirC.absolutePath).thenReturn(canonicalPath)
 
-		val suggestions = PathUtils.tryCompletePath(inputPath)
+		val suggestions = PathUtils.suggestPathCompletion(inputPath)
 
 		assertEquals(1, suggestions.size)
 		expectedPath.assertEquals(suggestions.get(0))
@@ -65,7 +65,7 @@ class PathUtilsTest {
 		val mockFile = mockNewFileWithExistance(inputPath, true)
 		when(mockFile.absolutePath).thenReturn('C:/Windows')
 
-		val suggestions = PathUtils.tryCompletePath(inputPath)
+		val suggestions = PathUtils.suggestPathCompletion(inputPath)
 
 		assertEquals(1, suggestions.size)
 		suggestions.get(0).assertEquals('C:/Windows/')
@@ -92,7 +92,7 @@ class PathUtilsTest {
 			mockNewFileWithAbsolutePath(mockFileDirC_2, 'c:', child, inputPath + child)
 		]
 
-		val suggestions = PathUtils.tryCompletePath(inputPath)
+		val suggestions = PathUtils.suggestPathCompletion(inputPath)
 
 		folderContents.size.assertEquals(suggestions.size)
 		folderContents.forEach[child |
@@ -117,7 +117,7 @@ class PathUtilsTest {
 		// mock: canonical path of expected completion
 		mockNewFileWithAbsolutePath(mockUsersDir, inputParentPath, 'All Users', expectedCompletion)
 
-		val suggestions = PathUtils.tryCompletePath(inputPath)
+		val suggestions = PathUtils.suggestPathCompletion(inputPath)
 
 		1.assertEquals(suggestions.size)
 		expectedCompletion.assertEquals(suggestions.get(0))

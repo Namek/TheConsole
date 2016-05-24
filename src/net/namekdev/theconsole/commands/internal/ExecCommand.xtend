@@ -16,6 +16,6 @@ class ExecCommand implements ICommand {
 	}
 
 	override completeArgument(IConsoleContext executionContext, String testArgument) {
-		return PathUtils.tryCompletePath(testArgument)
+		return PathUtils.suggestPathCompletion(testArgument)
 	}
 }

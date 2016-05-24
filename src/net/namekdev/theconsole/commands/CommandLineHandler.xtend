@@ -306,7 +306,7 @@ class CommandLineHandler implements ICommandLineHandler {
 
 			if (completions.length == 0) {
 				// no one could complete this argument, maybe it's just a full path?
-				completions.addAll(PathUtils.tryCompletePath(testArg))
+				completions.addAll(PathUtils.suggestPathCompletion(testArg))
 			}
 
 			lastTokensCount++
@@ -329,9 +329,16 @@ class CommandLineHandler implements ICommandLineHandler {
 		}
 		else if (completions.size > 0) {
 			// just display as text (for now)
-			consoleOutput.addInputEntry(completions.join('\n'))
+			val text = completions.join('\n')
 
-			// TODO use completions (there may be multiple of them!)
+			if (lastAddedEntry == null || lastAddedEntry.type != IConsoleOutputEntry.INPUT) {
+				lastAddedEntry = consoleOutput.addTextEntry(text)
+				lastAddedEntry.type = IConsoleOutputEntry.INPUT
+			}
+			else if (lastAddedEntry != null) {
+				// modify existing text entry
+				lastAddedEntry.setText(text)
+			}
 		}
 	}
 

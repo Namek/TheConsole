@@ -195,6 +195,6 @@ class JsUtilsProvider {
 	}
 
 	def String[] completePath(String absolutePath) {
-		return PathUtils.tryCompletePath(absolutePath)
+		return PathUtils.suggestPathCompletion(absolutePath)
 	}
 }

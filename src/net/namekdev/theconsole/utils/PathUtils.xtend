@@ -46,7 +46,7 @@ public abstract class PathUtils {
 	 *
 	 * @todo support unix-like systems which are not case-insensitive
 	 */
-	def static String[] tryCompletePath(String absolutePath) {
+	def static String[] suggestPathCompletion(String absolutePath) {
 		val suggestions = new ArrayList<String>
 
 		// first, try to complete what's given
@@ -94,7 +94,7 @@ public abstract class PathUtils {
 					]
 			}
 
-			suggestions.addAll(contents.map[path | new File(file, path).absolutePath])
+			suggestions.addAll(contents.map[path | normalize(new File(file, path).absolutePath)])
 		}
 
 		return suggestions.stream.distinct.collect(Collectors.toList)
