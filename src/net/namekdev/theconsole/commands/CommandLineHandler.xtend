@@ -312,22 +312,14 @@ class CommandLineHandler implements ICommandLineHandler {
 			lastTokensCount++
 		}
 
+		var String replaceToApply = null
+
 		if (completions.size == 1) {
-			val sb = new StringBuilder
-
-			if (token != null) {
-				sb.append(line.substring(0, token.pos))
-			}
-			else {
-				sb.append(line)
-			}
-
-			sb.append(completions.get(0))
-			val newCaretPos = sb.length
-			sb.append(line.substring(caretPos))
-			setInput(sb.toString, newCaretPos)
+			replaceToApply = completions.get(0)
 		}
 		else if (completions.size > 0) {
+			replaceToApply = findBiggestCommonPart(completions)
+
 			// just display as text (for now)
 			val text = completions.join('\n')
 
@@ -339,6 +331,32 @@ class CommandLineHandler implements ICommandLineHandler {
 				// modify existing text entry
 				lastAddedEntry.setText(text)
 			}
+		}
+
+		// perform console input partly replacement
+		if (replaceToApply != null) {
+			// no token is a case for no text after command name
+			val currentLine = if (token != null) line.substring(0, token.pos) else line
+			val currentLineLastChar = currentLine.charAt(currentLine.length - 1)
+			val isPathInQuotes = replaceToApply.contains(' ')
+
+			val sb = new StringBuilder(currentLine)
+
+			if (isPathInQuotes) {
+				if (!currentLineLastChar.equals('"'.charAt(0)) && !currentLineLastChar.equals("'".charAt(0))) {
+					sb.append('"')
+				}
+			}
+
+			sb.append(replaceToApply)
+
+			if (isPathInQuotes) {
+				sb.append('"')
+			}
+
+			val newCaretPos = sb.length
+			sb.append(line.substring(caretPos))
+			setInput(sb.toString, newCaretPos)
 		}
 	}
 
@@ -451,20 +469,23 @@ class CommandLineHandler implements ICommandLineHandler {
 		var charIndex = 0 as int
 		var isSearching = true
 
+		// TODO this code sucks even more when Xtend doesn't support continue or break instructions
+		// functional approach? go ahead if you like!
 		while (isSearching) {
 			val firstName = names.get(0)
 
 			if (firstName.length() <= charIndex) {
 				isSearching = false
 			}
+			else {
+				val c = firstName.charAt(charIndex)
 
-			val c = firstName.charAt(charIndex)
+				for (var i = 1; isSearching && i < names.size; i++) {
+					val name = names.get(i)
 
-			for (var i = 1; i < names.size; i++) {
-				val name = names.get(i)
-
-				if (name.length() <= charIndex || name.charAt(charIndex) != c) {
-					isSearching = false
+					if (name.length() <= charIndex || name.charAt(charIndex) != c) {
+						isSearching = false
+					}
 				}
 			}
 
