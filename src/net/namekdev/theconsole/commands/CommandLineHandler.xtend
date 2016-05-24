@@ -26,6 +26,9 @@ class CommandLineHandler implements ICommandLineHandler {
 
 	val SPACE_CHAR = 32 as char
 	val NEW_LINE_CHAR = 10 as char
+	val QUOTE = "'".charAt(0)
+	val QUOTE_DOUBLE = '"'.charAt(0)
+	val BACKQUOTE = '`'.charAt(0)
 
 	val paramRegex = Pattern.compile(
 		'''(\d+(\.\d*)?)|([\w:/\\\.]+)|\"([^\"]*)\"|\'([^']*)\'|`([^`]*)`''',
@@ -296,7 +299,7 @@ class CommandLineHandler implements ICommandLineHandler {
 			val testArg = line.substring(token.pos, caretPos)
 
 			if (isCommand) {
-				// first ask command's owner (a module, probably) whether it can complete the argument
+				// first ask command's owner (a module or script) whether it can complete the argument
 				val suggestions = command.completeArgument(consoleContext, testArg)
 
 				if (suggestions != null) {
@@ -333,29 +336,45 @@ class CommandLineHandler implements ICommandLineHandler {
 			}
 		}
 
-		// perform console input partly replacement
+		// perform console input partial replacement
 		if (replaceToApply != null) {
 			// no token is a case for no text after command name
 			val currentLine = if (token != null) line.substring(0, token.pos) else line
-			val currentLineLastChar = currentLine.charAt(currentLine.length - 1)
-			val isPathInQuotes = replaceToApply.contains(' ')
+			val currentLineEnd = currentLine.charAt(currentLine.length - 1)
+			val isArgInQuotes = replaceToApply.contains(' ')
+			val afterArgPart = line.substring(caretPos)
 
 			val sb = new StringBuilder(currentLine)
 
-			if (isPathInQuotes) {
-				if (!currentLineLastChar.equals('"'.charAt(0)) && !currentLineLastChar.equals("'".charAt(0))) {
-					sb.append('"')
+			if (isArgInQuotes) {
+				if (currentLineEnd != QUOTE && currentLineEnd != QUOTE_DOUBLE && currentLineEnd != BACKQUOTE) {
+					sb.append(BACKQUOTE)
 				}
 			}
 
 			sb.append(replaceToApply)
 
-			if (isPathInQuotes) {
-				sb.append('"')
+			var newCaretPos = sb.length
+
+			if (isArgInQuotes) {
+				var appendEndQuote = false
+
+				if (afterArgPart.length != 0) {
+					val afterArgBegin = afterArgPart.charAt(0)
+					if (afterArgBegin != QUOTE && afterArgBegin != QUOTE_DOUBLE && afterArgBegin != BACKQUOTE) {
+						appendEndQuote = true
+					}
+				}
+				else {
+					appendEndQuote = true
+				}
+
+				if (appendEndQuote) {
+					sb.append(BACKQUOTE)
+				}
 			}
 
-			val newCaretPos = sb.length
-			sb.append(line.substring(caretPos))
+			sb.append(afterArgPart)
 			setInput(sb.toString, newCaretPos)
 		}
 	}
@@ -478,12 +497,13 @@ class CommandLineHandler implements ICommandLineHandler {
 				isSearching = false
 			}
 			else {
-				val c = firstName.charAt(charIndex)
+				val c = Character.toLowerCase(firstName.charAt(charIndex))
 
 				for (var i = 1; isSearching && i < names.size; i++) {
 					val name = names.get(i)
+					val c2 = Character.toLowerCase(name.charAt(charIndex))
 
-					if (name.length() <= charIndex || name.charAt(charIndex) != c) {
+					if (name.length() <= charIndex || !c2.equals(c)) {
 						isSearching = false
 					}
 				}
