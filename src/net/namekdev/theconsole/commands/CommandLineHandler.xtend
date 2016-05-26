@@ -3,15 +3,13 @@ package net.namekdev.theconsole.commands
 import java.util.ArrayList
 import java.util.regex.Matcher
 import java.util.regex.Pattern
-import javafx.scene.input.KeyCode
-import javafx.scene.input.KeyEvent
 import net.namekdev.theconsole.commands.api.ICommand
 import net.namekdev.theconsole.commands.api.ICommandLineHandler
+import net.namekdev.theconsole.commands.api.ICommandLineUtils
 import net.namekdev.theconsole.scripts.execution.ScriptAssertError
 import net.namekdev.theconsole.state.api.IConsoleContext
 import net.namekdev.theconsole.utils.PathUtils
 import net.namekdev.theconsole.view.api.IConsoleOutput
-import net.namekdev.theconsole.view.api.IConsoleOutputEntry
 import net.namekdev.theconsole.view.api.IConsolePromptInput
 
 class CommandLineHandler implements ICommandLineHandler {
@@ -21,10 +19,9 @@ class CommandLineHandler implements ICommandLineHandler {
 	var IConsoleContext consoleContext
 	var IConsolePromptInput consolePrompt
 	var IConsoleOutput consoleOutput
+	var ICommandLineUtils utils
 
-	val CommandHistory history = new CommandHistory
 
-	val SPACE_CHAR = 32 as char
 	val NEW_LINE_CHAR = 10 as char
 	val QUOTE = "'".charAt(0)
 	val QUOTE_DOUBLE = '"'.charAt(0)
@@ -36,139 +33,47 @@ class CommandLineHandler implements ICommandLineHandler {
 	)
 
 	val commandNames = new ArrayList<String>()
-	var lastAddedEntry = null as IConsoleOutputEntry
-	var String temporaryCommandName
 
 	new(CommandManager commandManager) {
 		this.commandManager = commandManager
 		this.aliasManager = commandManager.aliases
 	}
 
-	override initContext(IConsoleContext context) {
+	override initContext(IConsoleContext context, ICommandLineUtils utils) {
 		this.consoleContext = context
 		this.consolePrompt = context.input
 		this.consoleOutput = context.output
+		this.utils = utils
 	}
 
-	override handle(KeyEvent evt) {
-		switch (evt.code) {
-			case KeyCode.TAB: {
-				var enableArgumentCompletion = false
+	override handleCompletion() {
+		var enableArgumentCompletion = false
 
-				if (countSpacesInInput() == 0) {
-					val completions = tryCompleteCommandName()
-					if (completions.size == 1) {
-						// add space
-						setInput(completions.get(0) + ' ')
-					}
-				}
-				else {
-					enableArgumentCompletion = true
-				}
-
-				if (enableArgumentCompletion) {
-					tryCompleteArgument()
-				}
-
-				evt.consume()
+		if (utils.countSpacesInInput() == 0) {
+			val completions = tryCompleteCommandName()
+			if (completions.size == 1) {
+				// add space
+				utils.setInput(completions.get(0) + ' ')
 			}
+		}
+		else {
+			enableArgumentCompletion = true
+		}
 
-			case KeyCode.ENTER: {
-				val fullCommand = getInput()
-
-				if (fullCommand.length() > 0) {
-					consoleOutput.addInputEntry(fullCommand)
-					setInput("")
-					tryExecuteCommand(fullCommand, false)
-					history.save(fullCommand)
-					lastAddedEntry = null
-					temporaryCommandName = null
-					history.resetPointer()
-				}
-			}
-
-			case KeyCode.ESCAPE: {
-				setInput("")
-				lastAddedEntry = null
-
-				if (temporaryCommandName == null) {
-					history.resetPointer()
-				}
-				else {
-					temporaryCommandName = null
-				}
-			}
-
-			case KeyCode.BACK_SPACE,
-			case KeyCode.DELETE: //DELETE
-			{
-				if (getInput().length() == 0) {
-					// forget old entry
-					lastAddedEntry = null
-				}
-			}
-
-			case KeyCode.UP: {
-				if (history.hasAny()) {
-					val input = getInput()
-
-					if (input.equals(history.getCurrent()))
-						history.morePast()
-					else {
-						temporaryCommandName = input
-					}
-
-					setInput(history.getCurrent())
-				}
-			}
-
-			case KeyCode.DOWN: {
-				if (history.hasAny()) {
-					if (history.lessPast()) {
-						setInput(if (temporaryCommandName != null) temporaryCommandName else "")
-					}
-					else {
-						setInput(history.getCurrent())
-					}
-				}
-			}
+		if (enableArgumentCompletion) {
+			tryCompleteArgument()
 		}
 	}
 
-	def void setInput(String text) {
-		setInput(text, -1)
+	override handleExecution() {
+		tryExecuteCommand(utils.getInput(), false)
 	}
 
-	def void setInput(String text, int caretPos) {
-		consolePrompt.setText(text)
-		consolePrompt.setCursorPosition(if (caretPos >= 0) caretPos else text.length())
-	}
-
-	def String getInput() {
-		return consolePrompt.getText()
-	}
-
-	def int getInputCursorPosition() {
-		return consolePrompt.cursorPosition
-	}
-
-	def int countSpacesInInput() {
-		var count = 0 as int
-		val str = getInput()
-
-		for (var i = 0, val n = str.length(); i < n; i++) {
-			if (str.charAt(i) == SPACE_CHAR) {
-				count++
-			}
-		}
-
-		return count
-	}
 
 	def tryCompleteCommandName() {
-		val namePart = getInput()
+		val namePart = utils.getInput()
 
-		// TODO search between aliases too
+		// search between true commands and command aliases
 		commandNames.clear()
 		commandNames.ensureCapacity(commandManager.commandCount + aliasManager.aliasCount)
 		commandManager.findCommandNamesStartingWith(namePart, commandNames)
@@ -180,18 +85,17 @@ class CommandLineHandler implements ICommandLineHandler {
 			val commandName = commandNames.get(0)
 
 			if (!commandName.equals(namePart)) {
-				setInput(commandName)
-				lastAddedEntry = null
+				utils.setInput(commandName)
+				utils.setInputEntry(null)
 			}
 		}
 
 		// Complete to the common part and show options to continue
 		else if (commandNames.size > 1) {
-			// TODO complete to the common part
 			val commonPart = findBiggestCommonPart(commandNames)
 
-			if (commonPart.length() > 0 && !getInput().equals(commonPart)) {
-				setInput(commonPart)
+			if (commonPart.length() > 0 && !utils.getInput().equals(commonPart)) {
+				utils.setInput(commonPart)
 			}
 			else {
 				// Present options
@@ -205,15 +109,7 @@ class CommandLineHandler implements ICommandLineHandler {
 				}
 
 				val text = sb.toString()
-
-				// Don't add the same output second time
-				if (lastAddedEntry == null || lastAddedEntry.type != IConsoleOutputEntry.INPUT) {
-					lastAddedEntry = consoleOutput.addTextEntry(text)
-					lastAddedEntry.type = IConsoleOutputEntry.INPUT
-				}
-				else if (lastAddedEntry != null) {
-					lastAddedEntry.setText(text)
-				}
+				utils.setInputEntry(text)
 			}
 
 		}
@@ -237,28 +133,15 @@ class CommandLineHandler implements ICommandLineHandler {
 				}
 			}
 
-			if (lastAddedEntry != null) {
-				if (!lastAddedEntry.valid) {
-					lastAddedEntry = null
-				}
-			}
-
-			if (lastAddedEntry == null || lastAddedEntry.type != IConsoleOutputEntry.INPUT) {
-				lastAddedEntry = consoleOutput.addTextEntry(sb.toString())
-				lastAddedEntry.type = IConsoleOutputEntry.INPUT
-			}
-			else if (lastAddedEntry != null) {
-				// modify existing text entry
-				lastAddedEntry.setText(sb.toString())
-			}
+			utils.setInputEntry(sb.toString())
 		}
 
 		return commandNames
 	}
 
 	private def void tryCompleteArgument() {
-		val line = getInput()
-		val caretPos = inputCursorPosition
+		val line = utils.getInput()
+		val caretPos = utils.inputCursorPosition
 
 		// we will tokenize and gather everything before caret position
 		val matcher = paramRegex.matcher(line)
@@ -325,15 +208,7 @@ class CommandLineHandler implements ICommandLineHandler {
 
 			// just display as text (for now)
 			val text = completions.join('\n')
-
-			if (lastAddedEntry == null || lastAddedEntry.type != IConsoleOutputEntry.INPUT) {
-				lastAddedEntry = consoleOutput.addTextEntry(text)
-				lastAddedEntry.type = IConsoleOutputEntry.INPUT
-			}
-			else if (lastAddedEntry != null) {
-				// modify existing text entry
-				lastAddedEntry.setText(text)
-			}
+			utils.setInputEntry(text)
 		}
 
 		// perform console input partial replacement
@@ -375,7 +250,7 @@ class CommandLineHandler implements ICommandLineHandler {
 			}
 
 			sb.append(afterArgPart)
-			setInput(sb.toString, newCaretPos)
+			utils.setInput(sb.toString, newCaretPos)
 		}
 	}
 
