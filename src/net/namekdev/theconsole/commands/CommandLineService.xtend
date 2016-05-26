@@ -5,6 +5,7 @@ import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import net.namekdev.theconsole.commands.api.ICommandLineHandler
 import net.namekdev.theconsole.commands.api.ICommandLineUtils
+import net.namekdev.theconsole.commands.repl.CommandLineHandler
 import net.namekdev.theconsole.state.api.IConsoleContext
 import net.namekdev.theconsole.view.api.IConsoleOutputEntry
 
@@ -117,7 +118,6 @@ class CommandLineService implements ICommandLineUtils, EventHandler<KeyEvent> {
 				val fullCommand = getInput()
 
 				if (fullCommand.length() > 0) {
-					consoleContext.output.addInputEntry(fullCommand)
 					currentHandler.handleExecution()
 					setInput("")
 					history.save(fullCommand)

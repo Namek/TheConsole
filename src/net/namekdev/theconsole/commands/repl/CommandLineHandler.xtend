@@ -1,8 +1,10 @@
-package net.namekdev.theconsole.commands
+package net.namekdev.theconsole.commands.repl
 
 import java.util.ArrayList
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import net.namekdev.theconsole.commands.AliasManager
+import net.namekdev.theconsole.commands.CommandManager
 import net.namekdev.theconsole.commands.api.ICommand
 import net.namekdev.theconsole.commands.api.ICommandLineHandler
 import net.namekdev.theconsole.commands.api.ICommandLineUtils
@@ -66,7 +68,9 @@ class CommandLineHandler implements ICommandLineHandler {
 	}
 
 	override handleExecution() {
-		tryExecuteCommand(utils.getInput(), false)
+		val command = utils.getInput()
+		consoleContext.output.addInputEntry(command)
+		tryExecuteCommand(command, false)
 	}
 
 	override dispose() {
