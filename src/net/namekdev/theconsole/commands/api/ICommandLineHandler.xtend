@@ -6,4 +6,5 @@ interface ICommandLineHandler {
 	def void initContext(IConsoleContext context, ICommandLineUtils utils)
 	def void handleCompletion()
 	def void handleExecution()
+	def void dispose()
 }

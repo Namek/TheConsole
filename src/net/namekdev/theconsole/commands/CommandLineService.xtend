@@ -31,6 +31,11 @@ class CommandLineService implements ICommandLineUtils, EventHandler<KeyEvent> {
 
 	def void setHandler(ICommandLineHandler handler) {
 		handler.initContext(consoleContext, this)
+
+		if (handler != currentHandler && handler != basicHandler) {
+			currentHandler.dispose()
+		}
+
 		currentHandler = handler
 	}
 
@@ -40,6 +45,11 @@ class CommandLineService implements ICommandLineUtils, EventHandler<KeyEvent> {
 
 	def void dispose() {
 		consoleContext.input.keyPressHandler = null
+		currentHandler.dispose()
+
+		if (basicHandler != currentHandler) {
+			basicHandler.dispose()
+		}
 	}
 
 	override setInputEntry(String text) {

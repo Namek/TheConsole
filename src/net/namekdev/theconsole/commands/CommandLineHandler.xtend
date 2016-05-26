@@ -69,6 +69,13 @@ class CommandLineHandler implements ICommandLineHandler {
 		tryExecuteCommand(utils.getInput(), false)
 	}
 
+	override dispose() {
+		consoleContext = null
+		consolePrompt = null
+		consoleOutput = null
+		utils = null
+	}
+
 
 	def tryCompleteCommandName() {
 		val namePart = utils.getInput()
