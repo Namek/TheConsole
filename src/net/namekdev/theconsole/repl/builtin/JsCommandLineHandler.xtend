@@ -1,4 +1,4 @@
-package net.namekdev.theconsole.commands.repl
+package net.namekdev.theconsole.repl.builtin
 
 import net.namekdev.theconsole.commands.api.ICommandLineHandler
 import net.namekdev.theconsole.state.api.IConsoleContext
@@ -15,6 +15,10 @@ class JsCommandLineHandler implements ICommandLineHandler {
 	override initContext(IConsoleContext context, ICommandLineUtils utils) {
 		this.context = context
 		this.utils = utils
+	}
+
+	override getName() {
+		class.name
 	}
 
 	override handleCompletion() {

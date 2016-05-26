@@ -1,4 +1,4 @@
-package net.namekdev.theconsole.commands.repl
+package net.namekdev.theconsole.commands
 
 import java.util.ArrayList
 import java.util.regex.Matcher
@@ -46,6 +46,10 @@ class CommandLineHandler implements ICommandLineHandler {
 		this.consolePrompt = context.input
 		this.consoleOutput = context.output
 		this.utils = utils
+	}
+
+	override getName() {
+		class.name
 	}
 
 	override handleCompletion() {

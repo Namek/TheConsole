@@ -1,11 +1,7 @@
 package net.namekdev.theconsole.commands.internal
 
-import java.util.List
 import net.namekdev.theconsole.commands.api.ICommand
-import net.namekdev.theconsole.commands.api.ICommandLineHandler
-import net.namekdev.theconsole.commands.repl.CommandLineHandler
 import net.namekdev.theconsole.state.api.IConsoleContext
-import org.reflections.Reflections
 
 class ReplCommand implements ICommand {
 	static val USAGE = '''
@@ -19,21 +15,16 @@ class ReplCommand implements ICommand {
 	static val COMMANDS = #["list", "set", "reset"]
 	static val SOMEHOW_GREEN = 0x00FF10
 
-	val refl = new Reflections(typeof(ICommand).package)
-	val List<Class<? extends ICommandLineHandler>> replTypes
-	val List<String> replTypeNames
-
-
-	new() {
-		replTypes = refl.getSubTypesOf(ICommandLineHandler).toList
-		replTypeNames = replTypes.map[type | type.name]
-	}
 
 	override run(IConsoleContext executionContext, String[] args) {
 		executionContext.jsUtils.assertInfo(args.length > 0, USAGE)
 
+		val repls = executionContext.replManager
+
+		val replTypeNames = repls.listAvailableReplNames()
+
 		val command = args.get(0)
-		var Class<? extends ICommandLineHandler> newReplType = null
+		var String newReplName = null
 
 		if (command.equals("list")) {
 			return replTypeNames.join('\n')
@@ -45,35 +36,17 @@ class ReplCommand implements ICommand {
 
 			if (index < 0) {
 				index = Integer.parseUnsignedInt(arg)
-				executionContext.jsUtils.assertError(index < replTypes.size, "there are only " + replTypes.size + " REPLs!")
+				executionContext.jsUtils.assertError(index < replTypeNames.size, "there are only " + replTypeNames.size + " REPLs!")
 			}
 
-			newReplType = replTypes.get(index)
+			newReplName = replTypeNames.get(index)
+			repls.setRepl(newReplName)
+
+			return null
 		}
 		else if (command.equals("reset")) {
-			newReplType = CommandLineHandler
-		}
-
-		if (newReplType != null) {
-			if (executionContext.commandLineService.handler.class.equals(newReplType)) {
-				executionContext.output.addErrorEntry("REPL is already set to that type. Not changing.")
-				return null
-			}
-
-			// is this basic command line handler?
-			// it's constructed in a special way (having command manager instance),
-			// so we're not going to instantiate a new one
-			if (newReplType.equals(CommandLineHandler)) {
-				executionContext.commandLineService.resetHandler()
-			}
-
-			// any other command line handler should be instantiated dynamically
-			else {
-				val repl = newReplType.constructors.get(0).newInstance() as ICommandLineHandler
-				executionContext.commandLineService.setHandler(repl)
-			}
-
-			executionContext.output.addTextEntry("REPL changed to: " + newReplType.name, SOMEHOW_GREEN)
+			repls.resetRepl()
+			executionContext.output.addTextEntry("REPL changed to: " + newReplName, SOMEHOW_GREEN)
 
 			return null
 		}
@@ -90,6 +63,8 @@ class ReplCommand implements ICommand {
 		else if (testArgument.startsWith('set')) {
 			// complete repl type name
 			val maybeReplName = testArgument.substring(3).trim
+
+			val replTypeNames = executionContext.replManager.listAvailableReplNames()
 
 			return replTypeNames
 				.filter[startsWith(maybeReplName)]

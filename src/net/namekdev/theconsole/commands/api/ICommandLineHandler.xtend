@@ -6,6 +6,13 @@ interface ICommandLineHandler {
 	def void initContext(IConsoleContext context, ICommandLineUtils utils)
 
 	/**
+	 * Returns name of command line handler.
+	 * <p>In js modules: if it's not implemented,
+	 * then module's name is returned automatically.</p>
+	 */
+	def String getName()
+
+	/**
 	 * Handle argument completion.
 	 * <p>Method is called when TAB key is pressed.</p>
 	 */

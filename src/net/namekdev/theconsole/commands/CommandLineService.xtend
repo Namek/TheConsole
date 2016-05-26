@@ -6,7 +6,6 @@ import javafx.scene.input.KeyEvent
 import net.namekdev.theconsole.commands.api.ICommandLineHandler
 import net.namekdev.theconsole.commands.api.ICommandLineService
 import net.namekdev.theconsole.commands.api.ICommandLineUtils
-import net.namekdev.theconsole.commands.repl.CommandLineHandler
 import net.namekdev.theconsole.state.api.IConsoleContext
 import net.namekdev.theconsole.view.api.IConsoleOutputEntry
 

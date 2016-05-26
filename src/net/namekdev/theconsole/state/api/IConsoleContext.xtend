@@ -6,6 +6,7 @@ import net.namekdev.theconsole.scripts.execution.JavaScriptEnvironment
 import net.namekdev.theconsole.scripts.execution.JsUtilsProvider
 import net.namekdev.theconsole.view.api.IConsoleOutput
 import net.namekdev.theconsole.view.api.IConsolePromptInput
+import net.namekdev.theconsole.repl.ReplManager
 
 interface IConsoleContext {
 	def IConsolePromptInput getInput()
@@ -13,6 +14,7 @@ interface IConsoleContext {
 	def ConsoleProxy getProxy()
 	def JsUtilsProvider getJsUtils()
 	def JavaScriptEnvironment getJsEnv()
+	def ReplManager getReplManager()
 	def ICommandLineService getCommandLineService()
 
 	def Object runJs(String code, Object[] args, Object context)
