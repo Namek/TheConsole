@@ -13,9 +13,10 @@ class ReplCommand implements ICommand {
 		 * repl list
 		 * repl set <repl_name>
 		 * repl set <repl_index>
+		 * repl reset
 	'''
 
-	static val COMMANDS = #["list", "set"]
+	static val COMMANDS = #["list", "set", "reset"]
 	static val SOMEHOW_GREEN = 0x00FF10
 
 	val refl = new Reflections(typeof(ICommand).package)
@@ -32,6 +33,7 @@ class ReplCommand implements ICommand {
 		executionContext.jsUtils.assertInfo(args.length > 0, USAGE)
 
 		val command = args.get(0)
+		var Class<? extends ICommandLineHandler> newReplType = null
 
 		if (command.equals("list")) {
 			return replTypeNames.join('\n')
@@ -46,7 +48,17 @@ class ReplCommand implements ICommand {
 				executionContext.jsUtils.assertError(index < replTypes.size, "there are only " + replTypes.size + " REPLs!")
 			}
 
-			val newReplType = replTypes.get(index)
+			newReplType = replTypes.get(index)
+		}
+		else if (command.equals("reset")) {
+			newReplType = CommandLineHandler
+		}
+
+		if (newReplType != null) {
+			if (executionContext.commandLineService.handler.class.equals(newReplType)) {
+				executionContext.output.addErrorEntry("REPL is already set to that type. Not changing.")
+				return null
+			}
 
 			// is this basic command line handler?
 			// it's constructed in a special way (having command manager instance),
@@ -61,7 +73,7 @@ class ReplCommand implements ICommand {
 				executionContext.commandLineService.setHandler(repl)
 			}
 
-			executionContext.output.addTextEntry("REPL changed to: " + replTypeNames.get(index), SOMEHOW_GREEN)
+			executionContext.output.addTextEntry("REPL changed to: " + newReplType.name, SOMEHOW_GREEN)
 
 			return null
 		}
