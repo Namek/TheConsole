@@ -70,6 +70,8 @@ class AppStateManager implements IConsoleContextManager {
 		val newContext = new ConsoleContext(windowController, input, output)
 		val commandLineService = new CommandLineService(newContext, commandManager)
 
+		newContext.commandLineService = commandLineService
+
 		val info = new ContextInfo(newContext, commandLineService)
 		contexts.add(info)
 

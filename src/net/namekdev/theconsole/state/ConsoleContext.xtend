@@ -1,12 +1,12 @@
 package net.namekdev.theconsole.state
 
 import java.util.function.BiConsumer
+import net.namekdev.theconsole.commands.api.ICommandLineService
 import net.namekdev.theconsole.scripts.ConsoleProxy
 import net.namekdev.theconsole.scripts.execution.JavaScriptEnvironment
 import net.namekdev.theconsole.scripts.execution.JsUtilsProvider
 import net.namekdev.theconsole.state.api.IConsoleContext
 import net.namekdev.theconsole.state.api.IConsoleContextManager
-import net.namekdev.theconsole.state.logging.AppLogs
 import net.namekdev.theconsole.view.api.IConsoleOutput
 import net.namekdev.theconsole.view.api.IConsolePromptInput
 import net.namekdev.theconsole.view.api.IWindowController
@@ -22,6 +22,7 @@ class ConsoleContext implements IConsoleContext {
 	private var ConsoleProxy proxy
 	private var JsUtilsProvider jsUtils
 	private var JavaScriptEnvironment jsEnv
+	package var ICommandLineService commandLineService
 
 
 
@@ -100,5 +101,9 @@ class ConsoleContext implements IConsoleContext {
 
 	override getJsEnv() {
 		return this.jsEnv
+	}
+
+	override getCommandLineService() {
+		return commandLineService
 	}
 }

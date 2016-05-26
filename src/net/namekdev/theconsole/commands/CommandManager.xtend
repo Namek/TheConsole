@@ -8,6 +8,7 @@ import net.namekdev.theconsole.commands.api.ICommand
 import net.namekdev.theconsole.commands.internal.AliasCommand
 import net.namekdev.theconsole.commands.internal.ExecCommand
 import net.namekdev.theconsole.utils.api.IDatabase
+import net.namekdev.theconsole.commands.internal.ReplCommand
 
 /**
  * Handles all commands and command aliasing.
@@ -23,6 +24,7 @@ class CommandManager {
 		aliases = new AliasManager(aliasStorage)
 		put("alias", new AliasCommand(aliases, aliasStorage))
 		put("exec", new ExecCommand())
+		put("repl", new ReplCommand())
 	}
 
 	def get(String name) {

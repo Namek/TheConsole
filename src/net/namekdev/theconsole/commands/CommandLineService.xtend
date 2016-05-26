@@ -4,12 +4,13 @@ import javafx.event.EventHandler
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import net.namekdev.theconsole.commands.api.ICommandLineHandler
+import net.namekdev.theconsole.commands.api.ICommandLineService
 import net.namekdev.theconsole.commands.api.ICommandLineUtils
 import net.namekdev.theconsole.commands.repl.CommandLineHandler
 import net.namekdev.theconsole.state.api.IConsoleContext
 import net.namekdev.theconsole.view.api.IConsoleOutputEntry
 
-class CommandLineService implements ICommandLineUtils, EventHandler<KeyEvent> {
+class CommandLineService implements ICommandLineService, ICommandLineUtils, EventHandler<KeyEvent> {
 	val IConsoleContext consoleContext
 
 	val ICommandLineHandler basicHandler
@@ -30,7 +31,7 @@ class CommandLineService implements ICommandLineUtils, EventHandler<KeyEvent> {
 		resetHandler()
 	}
 
-	def void setHandler(ICommandLineHandler handler) {
+	override setHandler(ICommandLineHandler handler) {
 		handler.initContext(consoleContext, this)
 
 		if (handler != currentHandler && handler != basicHandler) {
@@ -40,8 +41,12 @@ class CommandLineService implements ICommandLineUtils, EventHandler<KeyEvent> {
 		currentHandler = handler
 	}
 
-	def void resetHandler() {
+	override resetHandler() {
 		setHandler(basicHandler)
+	}
+
+	override getHandler() {
+		return currentHandler
 	}
 
 	def void dispose() {
