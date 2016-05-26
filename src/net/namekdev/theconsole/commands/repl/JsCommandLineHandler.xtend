@@ -20,8 +20,11 @@ class JsCommandLineHandler implements ICommandLineHandler {
 	override handleCompletion() {
 	}
 
-	override handleExecution() {
-		val command = utils.getInput()
+	override handleExecution(String command) {
+		if (command.length == 0) {
+			return false
+		}
+
 		context.output.addInputEntry(command)
 
 		val result = context.runUnscopedJs(command) as Object
@@ -32,6 +35,8 @@ class JsCommandLineHandler implements ICommandLineHandler {
 		else {
 			context.output.addTextEntry(result + "")
 		}
+
+		return true
 	}
 
 	override dispose() {

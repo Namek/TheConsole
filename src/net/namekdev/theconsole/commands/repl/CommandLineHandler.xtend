@@ -67,10 +67,14 @@ class CommandLineHandler implements ICommandLineHandler {
 		}
 	}
 
-	override handleExecution() {
-		val command = utils.getInput()
-		consoleContext.output.addInputEntry(command)
-		tryExecuteCommand(command, false)
+	override handleExecution(String command) {
+		if (command.length > 0) {
+			consoleContext.output.addInputEntry(command)
+			tryExecuteCommand(command, false)
+			return true
+		}
+
+		return false
 	}
 
 	override dispose() {

@@ -122,8 +122,7 @@ class CommandLineService implements ICommandLineService, ICommandLineUtils, Even
 			case KeyCode.ENTER: {
 				val fullCommand = getInput()
 
-				if (fullCommand.length() > 0) {
-					currentHandler.handleExecution()
+				if (currentHandler.handleExecution(fullCommand)) {
 					setInput("")
 					history.save(fullCommand)
 					lastAddedEntry = null
