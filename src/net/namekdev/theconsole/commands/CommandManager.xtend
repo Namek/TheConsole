@@ -24,7 +24,6 @@ class CommandManager {
 		aliases = new AliasManager(aliasStorage)
 		put("alias", new AliasCommand(aliases, aliasStorage))
 		put("exec", new ExecCommand())
-		put("repl", new ReplCommand())
 	}
 
 	def get(String name) {

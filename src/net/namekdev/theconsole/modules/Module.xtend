@@ -3,8 +3,11 @@ package net.namekdev.theconsole.modules
 import java.nio.file.Path
 import java.util.ArrayList
 import java.util.List
+import jdk.nashorn.api.scripting.ScriptObjectMirror
 import net.namekdev.theconsole.commands.CommandManager
 import net.namekdev.theconsole.commands.internal.ModuleCommand
+import net.namekdev.theconsole.repl.ReplManager
+import net.namekdev.theconsole.repl.instantiator.ModuleReplInstantiator
 import net.namekdev.theconsole.utils.PathUtils
 import net.namekdev.theconsole.utils.api.IDatabase.ISectionAccessor
 
@@ -44,5 +47,29 @@ class Module {
 			commandManager.put(cmd, new ModuleCommand(this, cmd))
 			registeredCommands.add(cmd)
 		]
+	}
+
+	/**
+	 * @return {@code true} if REPL should be set
+	 */
+	def boolean refreshRepl(ReplManager replManager, String replName, ScriptObjectMirror replObj) {
+		if (replObj != null) {
+			val replInstantiator = replManager.getDynamicRepl(replName)
+
+			// if REPL is existing then remove it first because we've jost got a new JS object
+			if (replInstantiator != null) {
+				replManager.removeDynamicRepl(replName)
+			}
+
+			val newReplInstantiator = new ModuleReplInstantiator(this, replObj)
+			replManager.putDynamicRepl(newReplInstantiator)
+
+			return true
+		}
+		else {
+			replManager.removeDynamicRepl(replName)
+		}
+
+		return false
 	}
 }

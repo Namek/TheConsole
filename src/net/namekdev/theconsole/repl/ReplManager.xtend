@@ -1,15 +1,12 @@
 package net.namekdev.theconsole.repl
 
 import java.util.List
+import java.util.TreeMap
+import net.namekdev.theconsole.commands.CommandLineHandler
 import net.namekdev.theconsole.commands.api.ICommandLineHandler
+import net.namekdev.theconsole.repl.api.IReplInstantiator
 import net.namekdev.theconsole.state.api.IConsoleContext
 import org.reflections.Reflections
-import net.namekdev.theconsole.commands.CommandLineHandler
-import java.util.Map
-import java.util.SortedMap
-import java.util.TreeSet
-import net.namekdev.theconsole.repl.api.IReplInstantiator
-import java.util.TreeMap
 
 /**
  * REPL stands for Read-Eval-Print Loop.
@@ -19,7 +16,6 @@ import java.util.TreeMap
 class ReplManager {
 	static val BASIC_REPL_NAME = typeof(CommandLineHandler).name
 
-	val IConsoleContext context
 	val refl = new Reflections(class.package)
 	val List<Class<? extends ICommandLineHandler>> builtinReplTypes
 	val List<String> builtinReplTypeNames
@@ -27,10 +23,11 @@ class ReplManager {
 
 
 
-	new(IConsoleContext consoleContext) {
-		this.context = consoleContext
+	new() {
+		builtinReplTypes = refl.getSubTypesOf(ICommandLineHandler)
+			.filter[constructors.length == 1 && constructors.get(0).parameterCount == 0]
+			.toList
 
-		builtinReplTypes = refl.getSubTypesOf(ICommandLineHandler).toList
 		builtinReplTypeNames = builtinReplTypes.map[type | type.name]
 	}
 
@@ -42,44 +39,40 @@ class ReplManager {
 		removeDynamicRepl(repl.name)
 	}
 
-	def setDynamicRepl(IReplInstantiator repl) {
+	def putDynamicRepl(IReplInstantiator repl) {
 		dynamicRepls.put(repl.name, repl)
 	}
 
-
-	def ICommandLineHandler getCurrentRepl() {
-		return context.commandLineService.handler
+	def getDynamicRepl(String name) {
+		return dynamicRepls.get(name)
 	}
 
 	def List<String> listAvailableReplNames() {
-		// TODO add all module-repls
+		val names = newArrayList()
+		names.addAll(builtinReplTypeNames)
+		val a = dynamicRepls.keySet.toList
+		names.addAll(a)
 
-		builtinReplTypeNames
+		return names
 	}
 
-	def List<ICommandLineHandler> listAvailableRepls() {
-		// TODO
+	def ICommandLineHandler getCurrentRepl(IConsoleContext context) {
+		return context.commandLineService.handler
 	}
 
-	def void setRepl(String replName) {
+	def void setRepl(IConsoleContext context, String replName) {
 		val replNames = listAvailableReplNames()
-		val curRepl = getCurrentRepl()
-
-		if (curRepl.name.equals(replName)) {
-			context.output.addErrorEntry("REPL is already set to that type. Not changing.")
-			return
-		}
 
 		// is this basic command line handler?
 		// it's constructed in a special way (having command manager instance),
 		// so we're not going to instantiate a new one
 		if (replName.equals(BASIC_REPL_NAME)) {
-			resetRepl()
+			resetRepl(context)
 		}
 
 		// any other command line handler should be instantiated dynamically
 		else if (replNames.contains(replName)) {
-			val repl = instantiateDynamicRepl(replName)
+			val repl = instantiateDynamicRepl(context, replName)
 			context.commandLineService.setHandler(repl)
 		}
 
@@ -88,11 +81,11 @@ class ReplManager {
 		}
 	}
 
-	def void resetRepl() {
+	def void resetRepl(IConsoleContext context) {
 		context.commandLineService.resetHandler()
 	}
 
-	private def ICommandLineHandler instantiateDynamicRepl(String replName) {
+	private def ICommandLineHandler instantiateDynamicRepl(IConsoleContext context, String replName) {
 		return dynamicRepls.get(replName).instantiate(context)
 	}
 }

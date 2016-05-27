@@ -10,7 +10,6 @@ import net.namekdev.theconsole.state.api.IConsoleContextManager
 import net.namekdev.theconsole.view.api.IConsoleOutput
 import net.namekdev.theconsole.view.api.IConsolePromptInput
 import net.namekdev.theconsole.view.api.IWindowController
-import net.namekdev.theconsole.repl.ReplManager
 
 /**
  * Provides everything for a tab.
@@ -23,7 +22,6 @@ class ConsoleContext implements IConsoleContext {
 	private var ConsoleProxy proxy
 	private var JsUtilsProvider jsUtils
 	private var JavaScriptEnvironment jsEnv
-	private val ReplManager replManager
 	package var ICommandLineService commandLineService
 
 
@@ -42,7 +40,6 @@ class ConsoleContext implements IConsoleContext {
 
 		jsUtils = new JsUtilsProvider(this)
 		jsEnv = createJsEnvironment()
-		replManager = new ReplManager(this)
 	}
 
 	def private createJsEnvironment() {
@@ -104,10 +101,6 @@ class ConsoleContext implements IConsoleContext {
 
 	override getJsEnv() {
 		return this.jsEnv
-	}
-
-	override getReplManager() {
-		return replManager
 	}
 
 	override getCommandLineService() {

@@ -7,7 +7,9 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.Map
 import java.util.TreeMap
+import jdk.nashorn.api.scripting.ScriptObjectMirror
 import net.namekdev.theconsole.commands.CommandManager
+import net.namekdev.theconsole.repl.ReplManager
 import net.namekdev.theconsole.scripts.execution.JavaScriptEnvironment
 import net.namekdev.theconsole.scripts.execution.ScriptAssertError
 import net.namekdev.theconsole.state.api.ConsoleContextListener
@@ -30,6 +32,7 @@ class ModuleManager {
 	val IDatabase settings
 	val Map<String, Module> loadedModules = new TreeMap
 	val CommandManager commandManager
+	val ReplManager replManager
 	val tmpJsEnv = new JavaScriptEnvironment()
 
 
@@ -41,9 +44,10 @@ class ModuleManager {
 	}
 
 
-	new(IDatabase settings, CommandManager commands, IConsoleContextProvider consoleContextProvider) {
+	new(IDatabase settings, CommandManager commands, ReplManager repls, IConsoleContextProvider consoleContextProvider) {
 		this.settings = settings
 		this.commandManager = commands
+		this.replManager = repls
 		this.consoleContextProvider = consoleContextProvider
 
 		initRequireJs(tmpJsEnv)
@@ -156,6 +160,23 @@ class ModuleManager {
 			// load/unload commands
 			module.refreshCommands(this.commandManager, commands)
 		}
+
+		// module may or may have had implement REPL
+		val replObj = tmpJsEnv.eval('''«module.variableName».commandLineHandler''') as ScriptObjectMirror
+		val replName = module.name
+		val hasRepl = module.refreshRepl(replManager, replName, replObj)
+
+		consoleContextProvider.contexts.forEach[context |
+			// if this REPL was used in any context then replace it with a new object or reset to default one
+			if (replManager.getCurrentRepl(context).name.equals(replName)) {
+				if (hasRepl) {
+					replManager.setRepl(context, replName)
+				}
+				else {
+					replManager.resetRepl(context)
+				}
+			}
+		]
 	}
 
 	/**

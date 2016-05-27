@@ -46,8 +46,8 @@ class JsFilesManager {
 	Map<String, ScriptCommand> scripts = new TreeMap
 
 	val providesRegex = Pattern.compile(
-		'''///\s*provides:\s*((\w+),?)+'''
-//		Pattern.UNICODE_CHARACTER_CLASS
+		'''///\s*provides:\s*((\w+),?)+''',
+		Pattern.UNICODE_CHARACTER_CLASS
 	)
 
 

@@ -22,11 +22,14 @@ import net.namekdev.theconsole.view.api.IConsoleOutput
 import net.namekdev.theconsole.view.api.IConsolePromptInput
 import net.namekdev.theconsole.view.api.IWindowController
 import rx.Subscription
+import net.namekdev.theconsole.commands.internal.ReplCommand
+import net.namekdev.theconsole.repl.ReplManager
 
 class AppStateManager implements IConsoleContextManager {
 	JsFilesManager jsFilesManager
 	CommandManager commandManager
 	IDatabase database
+	ReplManager replManager
 	ModuleManager moduleManager
 	val IWindowController windowController
 
@@ -51,10 +54,13 @@ class AppStateManager implements IConsoleContextManager {
 			generalLogs.error(exc.message)
 		}
 
+		replManager = new ReplManager()
 		commandManager = new CommandManager(database)
-		moduleManager = new ModuleManager(database, commandManager, this)
+		moduleManager = new ModuleManager(database, commandManager, replManager, this)
 		jsFilesManager = new JsFilesManager(database, this, commandManager, moduleManager)
 		jsFilesManager.init()
+
+		commandManager.put("repl", new ReplCommand(replManager))
 	}
 
 	@Subscribe()
