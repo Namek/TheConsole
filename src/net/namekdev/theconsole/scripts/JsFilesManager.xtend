@@ -144,13 +144,15 @@ class JsFilesManager {
 
 			val features = new ArrayList<String>
 			val scanner = new Scanner(code)
-			val line = scanner.nextLine
-			val m = providesRegex.matcher(line)
-			m.region(0, line.length)
+			if (scanner.hasNext) {
+				val line = scanner.nextLine
+				val m = providesRegex.matcher(line)
+				m.region(0, line.length)
 
-			for (var i = 1; m.find && i <= m.groupCount; i+=2) {
-				val featureName = m.group(i)
-				features.add(featureName)
+				for (var i = 1; m.find && i <= m.groupCount; i+=2) {
+					val featureName = m.group(i)
+					features.add(featureName)
+				}
 			}
 
 			var script = scripts.get(scriptName)
@@ -168,7 +170,7 @@ class JsFilesManager {
 			script.setup(code, features)
 		}
 		catch (IOException exc) {
-			logs.error(exc.toString())
+			logs.error(path + ": " + exc.toString())
 		}
 	}
 
