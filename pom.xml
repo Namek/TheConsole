@@ -4,9 +4,9 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.namekdev.theconsole</groupId>
 	<artifactId>theconsole</artifactId>
-	<version>0.2-SNAPSHOT</version>
+	<version>0.2</version>
 	<name>The Console</name>
-	<url>https://github.com/Namek/TheConsole2</url>
+	<url>https://github.com/Namek/TheConsole</url>
 	<properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <xtend.version>2.9.2</xtend.version>
