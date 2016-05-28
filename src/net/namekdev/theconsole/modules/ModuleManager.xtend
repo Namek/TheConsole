@@ -74,7 +74,10 @@ class ModuleManager {
 			// reload module
 			logs.log("Reloading module: " + name)
 			val module = loadedModules.get(name)
-			triggerModuleRequire(module)
+
+			if (!triggerModuleRequire(module)) {
+				logs.log("Module reload was unsuccessful: " + name)
+			}
 		}
 		else {
 			val dir = moduleFolder
@@ -143,11 +146,14 @@ class ModuleManager {
 		return null
 	}
 
-	private def void triggerModuleRequire(Module module) {
+	private def boolean triggerModuleRequire(Module module) {
+		if (!triggerModuleRequire(tmpJsEnv, module, false)) {
+			return false
+		}
+
 		consoleContextProvider.contexts.forEach[context |
-			triggerModuleRequire(context.jsEnv, module)
+			triggerModuleRequire(context.jsEnv, module, true)
 		]
-		triggerModuleRequire(tmpJsEnv, module)
 
 		// get current list of commands
 		val cmds = tmpJsEnv.eval('''«module.variableName».commands''')
@@ -177,14 +183,16 @@ class ModuleManager {
 				}
 			}
 		]
+
+		return true
 	}
 
 	/**
 	 * Load module be <code>require()</code>-ing given <code>.js</code> file.
 	 */
-	private def void triggerModuleRequire(JavaScriptEnvironment jsEnv, Module module) {
+	private def boolean triggerModuleRequire(JavaScriptEnvironment jsEnv, Module module, boolean callLoadHooks) {
 		// if same module is already loaded then unload it first
-		triggerModuleUnload(jsEnv, module)
+		triggerModuleUnload(jsEnv, module, callLoadHooks)
 
 		// set context of module (`this` variable available in `onload`)
 		jsEnv.tempArgs.context = module.context
@@ -194,11 +202,16 @@ class ModuleManager {
 			val ret = jsEnv.eval('''
 				var «module.variableName» = require("«module.relativeEntryFilePath»")
 
+				«IF callLoadHooks»
 				if («module.variableName».onload)
 					«module.variableName».onload.apply(TemporaryArgs.context, null)
+				«ENDIF»
 			''')
 			if (ret instanceof Error || ret instanceof Exception) {
 				logs.error(ret.toString)
+			}
+			else {
+				return true
 			}
 		}
 		catch (ScriptAssertError assertion) {
@@ -217,23 +230,27 @@ class ModuleManager {
 		catch (Error error) {
 			error.printStackTrace()
 		}
+
+		return false
 	}
 
 	private def void triggerModuleUnload(Module module) {
 		consoleContextProvider.contexts.forEach[context |
-			triggerModuleUnload(context.jsEnv, module)
+			triggerModuleUnload(context.jsEnv, module, true)
 		]
-		triggerModuleUnload(tmpJsEnv, module)
+		triggerModuleUnload(tmpJsEnv, module, false)
 	}
 
-	private def void triggerModuleUnload(JavaScriptEnvironment jsEnv, Module module) {
+	private def void triggerModuleUnload(JavaScriptEnvironment jsEnv, Module module, boolean callOnUnload) {
 		val moduleObj = jsEnv.getObject(module.variableName)
 
 		if (moduleObj != null) {
 			try {
 				jsEnv.eval('''
+					«IF callOnUnload»
 					if («module.variableName».onunload)
 						«module.variableName».onunload()
+					«ENDIF»
 
 					delete require.cache["«module.relativeEntryFilePath.toString»"]
 				''')
@@ -266,13 +283,13 @@ class ModuleManager {
 			initRequireJs(context.jsEnv)
 
 			loadedModules.forEach[name, module |
-				triggerModuleRequire(context.jsEnv, module)
+				triggerModuleRequire(context.jsEnv, module, true)
 			]
 		}
 
 		override onContextDestroying(IConsoleContext context) {
 			loadedModules.forEach[name, module |
-				triggerModuleUnload(context.jsEnv, module)
+				triggerModuleUnload(context.jsEnv, module, true)
 			]
 		}
 	}
