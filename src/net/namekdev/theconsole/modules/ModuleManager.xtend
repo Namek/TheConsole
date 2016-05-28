@@ -164,7 +164,7 @@ class ModuleManager {
 		// module may or may have had implement REPL
 		val replObj = tmpJsEnv.eval('''«module.variableName».commandLineHandler''') as ScriptObjectMirror
 		val replName = module.name
-		val hasRepl = module.refreshRepl(replManager, replName, replObj)
+		val hasRepl = module.refreshRepl(replManager, replName, replObj != null)
 
 		consoleContextProvider.contexts.forEach[context |
 			// if this REPL was used in any context then replace it with a new object or reset to default one

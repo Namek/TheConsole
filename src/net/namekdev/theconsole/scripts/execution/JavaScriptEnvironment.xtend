@@ -67,23 +67,21 @@ class JavaScriptEnvironment {
 		engine.get(variableName)
 	}
 
-	def Object eval(String scriptCode) {
-		return eval(scriptCode, true)
+	def Object evalInScope(String code) {
+		return eval('''(function() { «code» })()''')
 	}
 
-	def Object eval(String scriptCode, boolean returnExceptionObject) {
+	def Object eval(String code) {
 		var ret = null as Object
 
 		try {
-			ret = engine.eval(scriptCode, engineBindings)
+			ret = engine.eval(code, engineBindings)
 		}
-		catch (Exception e) {
-			if (returnExceptionObject) {
-				ret = e
-			}
+		catch (Exception exc) {
+			ret = exc
 
-			if (!(e instanceof ScriptException)) {
-				e.printStackTrace()
+			if (!(exc instanceof ScriptException)) {
+				exc.printStackTrace()
 			}
 		}
 

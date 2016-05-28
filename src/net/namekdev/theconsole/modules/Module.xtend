@@ -52,8 +52,8 @@ class Module {
 	/**
 	 * @return {@code true} if REPL should be set
 	 */
-	def boolean refreshRepl(ReplManager replManager, String replName, ScriptObjectMirror replObj) {
-		if (replObj != null) {
+	def boolean refreshRepl(ReplManager replManager, String replName, boolean replExists) {
+		if (replExists) {
 			val replInstantiator = replManager.getDynamicRepl(replName)
 
 			// if REPL is existing then remove it first because we've jost got a new JS object
@@ -61,7 +61,7 @@ class Module {
 				replManager.removeDynamicRepl(replName)
 			}
 
-			val newReplInstantiator = new ModuleReplInstantiator(this, replObj)
+			val newReplInstantiator = new ModuleReplInstantiator(this)
 			replManager.putDynamicRepl(newReplInstantiator)
 
 			return true
