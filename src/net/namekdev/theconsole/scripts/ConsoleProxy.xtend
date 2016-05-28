@@ -25,10 +25,9 @@ class ConsoleProxy {
 		consoleOutput.addTextEntry(text, colorHex)
 	}
 
-// TODO bring it back!
-//	def void error(String text) {
-//		consoleOutput.addErrorEntry(text)
-//	}
+	def void error(String text) {
+		consoleOutput.addErrorEntry(text)
+	}
 
 	def void clear() {
 		consoleOutput.clear()
