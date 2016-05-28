@@ -31,7 +31,7 @@ class CommandLineService implements ICommandLineService, ICommandLineUtils, Even
 	}
 
 	override setHandler(ICommandLineHandler handler) {
-		handler.initContext(consoleContext, this)
+		handler.init(consoleContext, this)
 
 		if (handler != currentHandler && handler != basicHandler) {
 			currentHandler.dispose()

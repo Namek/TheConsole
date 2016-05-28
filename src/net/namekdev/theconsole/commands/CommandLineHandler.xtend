@@ -39,7 +39,7 @@ class CommandLineHandler implements ICommandLineHandler {
 		this.aliasManager = commandManager.aliases
 	}
 
-	override initContext(IConsoleContext context, ICommandLineUtils utils) {
+	override init(IConsoleContext context, ICommandLineUtils utils) {
 		this.consoleContext = context
 		this.consolePrompt = context.input
 		this.consoleOutput = context.output

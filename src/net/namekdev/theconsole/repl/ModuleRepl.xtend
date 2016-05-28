@@ -15,20 +15,24 @@ class ModuleRepl implements ICommandLineHandler {
 		this.context = context
 	}
 
-	override initContext(IConsoleContext context, ICommandLineUtils utils) {
+	override init(IConsoleContext context, ICommandLineUtils utils) {
 		try {
 			context.jsEnv.tempArgs.args = #[context, utils]
 
-			context.jsEnv.evalInScope('''
+			val ret = context.jsEnv.evalInScope('''
 				var clh = «module.variableName».commandLineHandler;
-				clh.context = context
-				clh.utils = utils
+				clh.context = TemporaryArgs.args[0]
+				clh.utils = TemporaryArgs.args[1]
 
-				var fn = clh.initContext;
+				var fn = clh.init;
 				if (fn) {
-					fn.apply(clh, TemporaryArgs.args)
+					fn.apply(clh)
 				}
 			''')
+
+			if (ret instanceof ScriptException) {
+				context.output.addErrorEntry((ret as ScriptException).toString)
+			}
 		}
 		catch (Exception exc) {
 			context.output.addErrorEntry(exc.toString)

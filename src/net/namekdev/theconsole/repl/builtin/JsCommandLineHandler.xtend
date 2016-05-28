@@ -12,7 +12,7 @@ class JsCommandLineHandler implements ICommandLineHandler {
 	var IConsoleContext context
 	var ICommandLineUtils utils
 
-	override initContext(IConsoleContext context, ICommandLineUtils utils) {
+	override init(IConsoleContext context, ICommandLineUtils utils) {
 		this.context = context
 		this.utils = utils
 	}
