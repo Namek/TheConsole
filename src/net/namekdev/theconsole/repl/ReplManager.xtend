@@ -7,6 +7,7 @@ import net.namekdev.theconsole.commands.api.ICommandLineHandler
 import net.namekdev.theconsole.repl.api.IReplInstantiator
 import net.namekdev.theconsole.state.api.IConsoleContext
 import org.reflections.Reflections
+import java.util.Map
 
 /**
  * REPL stands for Read-Eval-Print Loop.
@@ -17,18 +18,17 @@ class ReplManager {
 	static val BASIC_REPL_NAME = typeof(CommandLineHandler).name
 
 	val refl = new Reflections(class.package)
-	val List<Class<? extends ICommandLineHandler>> builtinReplTypes
+	val Map<String, Class<? extends ICommandLineHandler>> builtinReplTypes
 	val List<String> builtinReplTypeNames
 	val dynamicRepls = new TreeMap<String, IReplInstantiator>
-
 
 
 	new() {
 		builtinReplTypes = refl.getSubTypesOf(ICommandLineHandler)
 			.filter[constructors.length == 1 && constructors.get(0).parameterCount == 0]
-			.toList
+			.toMap[name]
 
-		builtinReplTypeNames = builtinReplTypes.map[type | type.name]
+		builtinReplTypeNames = builtinReplTypes.keySet.toList
 	}
 
 	def removeDynamicRepl(String name) {
@@ -86,6 +86,14 @@ class ReplManager {
 	}
 
 	private def ICommandLineHandler instantiateDynamicRepl(IConsoleContext context, String replName) {
-		return dynamicRepls.get(replName).instantiate(context)
+		// first try to instantiate dynamic REPL
+		val instantiator = dynamicRepls.get(replName)
+
+		if (instantiator != null) {
+			return instantiator.instantiate(context)
+		}
+
+		// if not succeeded, then instantiate a built-in REPL
+		return builtinReplTypes.get(replName).constructors.get(0).newInstance() as ICommandLineHandler
 	}
 }
