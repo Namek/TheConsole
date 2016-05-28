@@ -73,7 +73,7 @@ class AppStateManager implements IConsoleContextManager {
 	@Subscribe()
 	def void onResetCommandLineHandlerEvent(ResetCommandLineHandlerEvent evt) {
 		replManager.resetRepl(currentTabContext)
-		currentTabContext.output.addTextEntry("REPL reset to default CommandLineHandler")
+		currentTabContext.output.addTextEntry("REPL reset to default CommandLineHandler", ReplCommand.SOMEHOW_GREEN)
 	}
 
 

@@ -16,7 +16,7 @@ class ReplCommand implements ICommand {
 	'''
 
 	static val COMMANDS = #["list", "set", "reset"]
-	static val SOMEHOW_GREEN = 0x00FF10
+	public static val SOMEHOW_GREEN = 0x00FF10
 
 	val ReplManager repls
 
@@ -63,7 +63,7 @@ class ReplCommand implements ICommand {
 		}
 		else if (command.equals("reset")) {
 			repls.resetRepl(executionContext)
-			executionContext.output.addTextEntry("REPL reset to: " + newReplName, SOMEHOW_GREEN)
+			executionContext.output.addTextEntry("REPL reset to default CommandLineHandler", SOMEHOW_GREEN)
 
 			return null
 		}
