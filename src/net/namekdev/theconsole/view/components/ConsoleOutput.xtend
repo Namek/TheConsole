@@ -110,7 +110,7 @@ class ConsoleOutput implements IConsoleOutput {
 
 	override addTextEntry(String text, int colorHex) {
 		createTextEntry(text, null, [ entryNode, textNode |
-			val hexColor = Integer.toHexString(colorHex)
+			val hexColor = String.format("%06x", colorHex)
 			entryNode.setAttribute("style", "color: #" + hexColor)
 		])
 	}
