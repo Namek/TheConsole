@@ -1,8 +1,10 @@
 package net.namekdev.theconsole.commands.internal
 
+import java.util.stream.Collectors
+import java.util.stream.IntStream
 import net.namekdev.theconsole.commands.api.ICommand
-import net.namekdev.theconsole.state.api.IConsoleContext
 import net.namekdev.theconsole.repl.ReplManager
+import net.namekdev.theconsole.state.api.IConsoleContext
 
 class ReplCommand implements ICommand {
 	static val USAGE = '''
@@ -31,7 +33,16 @@ class ReplCommand implements ICommand {
 		var String newReplName = null
 
 		if (command.equals("list")) {
-			return replTypeNames.join('\n')
+			val digitsCount = Math.floor(Math.log10(replTypeNames.length)) as int + 1
+
+			return IntStream.range(0, replTypeNames.length)
+				.mapToObj[i |
+					val s = '''#«i»: «replTypeNames.get(i)»'''
+
+					// left padding
+					return String.format("%1$" + (digitsCount + 1) + "s", s);
+				]
+				.collect(Collectors.joining('\n'))
 		}
 		else if (command.equals("set")) {
 			val arg = args.get(1)
