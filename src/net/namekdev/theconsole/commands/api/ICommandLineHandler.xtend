@@ -23,7 +23,7 @@ interface ICommandLineHandler {
 	 * <p>Should return {@code false} when command cannot be
 	 * executed in any way, e.g. when it's an empty string.</p>
 	 */
-	def boolean handleExecution(String command)
+	def boolean handleExecution(String input, ICommandLineUtils utils, IConsoleContext context)
 
 	/**
 	 * Dispose any native streams, connections etc.

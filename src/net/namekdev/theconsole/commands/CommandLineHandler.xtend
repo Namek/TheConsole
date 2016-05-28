@@ -69,7 +69,9 @@ class CommandLineHandler implements ICommandLineHandler {
 		}
 	}
 
-	override handleExecution(String command) {
+	override handleExecution(String input, ICommandLineUtils utils, IConsoleContext context) {
+		val String command = input
+
 		if (command.length > 0) {
 			consoleContext.output.addInputEntry(command)
 			tryExecuteCommand(command, false)

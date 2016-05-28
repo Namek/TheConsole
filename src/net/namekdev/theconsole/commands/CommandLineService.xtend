@@ -119,11 +119,11 @@ class CommandLineService implements ICommandLineService, ICommandLineUtils, Even
 			}
 
 			case KeyCode.ENTER: {
-				val fullCommand = getInput()
+				val input = getInput()
 
-				if (currentHandler.handleExecution(fullCommand)) {
+				if (currentHandler.handleExecution(input, this, consoleContext)) {
 					setInput("")
-					history.save(fullCommand)
+					history.save(input)
 					lastAddedEntry = null
 					temporaryCommandName = null
 					history.resetPointer()

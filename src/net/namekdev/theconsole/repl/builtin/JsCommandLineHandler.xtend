@@ -24,14 +24,14 @@ class JsCommandLineHandler implements ICommandLineHandler {
 	override handleCompletion() {
 	}
 
-	override handleExecution(String command) {
-		if (command.length == 0) {
+	override handleExecution(String input, ICommandLineUtils utils, IConsoleContext context) {
+		if (input.length == 0) {
 			return false
 		}
 
-		context.output.addInputEntry(command)
+		context.output.addInputEntry(input)
 
-		val result = context.runUnscopedJs(command) as Object
+		val result = context.runUnscopedJs(input) as Object
 
 		if (result instanceof Exception) {
 			context.output.addErrorEntry(result.toString())

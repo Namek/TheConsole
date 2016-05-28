@@ -20,9 +20,13 @@ class ModuleRepl implements ICommandLineHandler {
 			context.jsEnv.tempArgs.args = #[context, utils]
 
 			context.jsEnv.evalInScope('''
-				var fn = «module.variableName».commandLineHandler.initContext;
+				var clh = «module.variableName».commandLineHandler;
+				clh.context = context
+				clh.utils = utils
+
+				var fn = clh.initContext;
 				if (fn) {
-					fn(TemporaryArgs.args[0], TemporaryArgs.args[1])
+					fn.apply(clh, TemporaryArgs.args)
 				}
 			''')
 		}
@@ -42,23 +46,25 @@ class ModuleRepl implements ICommandLineHandler {
 	override handleCompletion() {
 		try {
 			context.jsEnv.evalInScope('''
-				var fn = «module.variableName».commandLineHandler.handleCompletion;
+				var clh = «module.variableName».commandLineHandler;
+				var fn = clh.handleCompletion;
 				if (fn) {
-					return fn()
+					return fn.apply(clh)
 				}
 			''')
 		}
 		catch (Exception exc) { }
 	}
 
-	override handleExecution(String command) {
+	override handleExecution(String input, ICommandLineUtils utils, IConsoleContext context) {
 		try {
-			context.jsEnv.tempArgs.args = #[command]
+			context.jsEnv.tempArgs.args = #[input, utils, context]
 
 			val ret = context.jsEnv.evalInScope('''
-				var fn = «module.variableName».commandLineHandler.handleExecution;
+				var clh = «module.variableName».commandLineHandler;
+				var fn = clh.handleExecution;
 				if (fn) {
-					fn(TemporaryArgs.args[0])
+					fn.apply(clh, TemporaryArgs.args)
 				}
 			''')
 
@@ -82,9 +88,10 @@ class ModuleRepl implements ICommandLineHandler {
 	override dispose() {
 		try {
 			context.jsEnv.evalInScope('''
-				var fn = «module.variableName».commandLineHandler.handleCompletion;
+				var clh = «module.variableName».commandLineHandler;
+				var fn = clh.handleCompletion;
 				if (fn) {
-					return fn()
+					return fn.apply(clh)
 				}
 			''')
 		}
