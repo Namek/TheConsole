@@ -7,9 +7,12 @@ import java.util.List
 import javafx.application.Platform
 import net.namekdev.theconsole.commands.CommandLineService
 import net.namekdev.theconsole.commands.CommandManager
+import net.namekdev.theconsole.commands.internal.ReplCommand
 import net.namekdev.theconsole.events.Events
+import net.namekdev.theconsole.events.ResetCommandLineHandlerEvent
 import net.namekdev.theconsole.events.ScriptsFolderClickEvent
 import net.namekdev.theconsole.modules.ModuleManager
+import net.namekdev.theconsole.repl.ReplManager
 import net.namekdev.theconsole.scripts.JsFilesManager
 import net.namekdev.theconsole.state.api.ConsoleContextListener
 import net.namekdev.theconsole.state.api.IConsoleContext
@@ -22,8 +25,6 @@ import net.namekdev.theconsole.view.api.IConsoleOutput
 import net.namekdev.theconsole.view.api.IConsolePromptInput
 import net.namekdev.theconsole.view.api.IWindowController
 import rx.Subscription
-import net.namekdev.theconsole.commands.internal.ReplCommand
-import net.namekdev.theconsole.repl.ReplManager
 
 class AppStateManager implements IConsoleContextManager {
 	JsFilesManager jsFilesManager
@@ -67,6 +68,12 @@ class AppStateManager implements IConsoleContextManager {
 	def void onOpenScriptFolder(ScriptsFolderClickEvent evt) {
 		windowController.visible = false
 		Desktop.desktop.open(PathUtils.scriptsDir.toFile)
+	}
+
+	@Subscribe()
+	def void onResetCommandLineHandlerEvent(ResetCommandLineHandlerEvent evt) {
+		replManager.resetRepl(currentTabContext)
+		currentTabContext.output.addTextEntry("REPL reset to default CommandLineHandler")
 	}
 
 

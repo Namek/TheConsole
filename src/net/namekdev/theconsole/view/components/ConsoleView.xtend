@@ -10,16 +10,21 @@ import javafx.fxml.FXMLLoader
 import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
 import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyCodeCombination
+import javafx.scene.input.KeyCombination
 import javafx.scene.input.KeyEvent
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.AnchorPane
 import net.namekdev.theconsole.events.Events
+import net.namekdev.theconsole.events.ResetCommandLineHandlerEvent
 import net.namekdev.theconsole.events.ScriptsFolderClickEvent
 import net.namekdev.theconsole.state.api.IConsoleContextManager
 
 class ConsoleView extends AnchorPane {
 	IConsoleContextManager consoleContextManager
 	@FXML public TabPane tabPane
+
+	val combCtrlE = new KeyCodeCombination(KeyCode.E, KeyCombination.CONTROL_DOWN)
 
 
 	public new() {
@@ -49,6 +54,12 @@ class ConsoleView extends AnchorPane {
 
 		btnOpenFolder.addEventHandler(MouseEvent.MOUSE_CLICKED, [
 			Events.post(new ScriptsFolderClickEvent(btnOpenFolder))
+		])
+
+		addEventHandler(KeyEvent.KEY_RELEASED, [evt |
+			if (combCtrlE.match(evt)) {
+				Events.post(new ResetCommandLineHandlerEvent())
+			}
 		])
 	}
 
