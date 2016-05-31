@@ -8,6 +8,7 @@ import net.namekdev.theconsole.repl.api.IReplInstantiator
 import net.namekdev.theconsole.state.api.IConsoleContext
 import org.reflections.Reflections
 import java.util.Map
+import java.lang.reflect.Modifier
 
 /**
  * REPL stands for Read-Eval-Print Loop.
@@ -25,10 +26,14 @@ class ReplManager {
 
 	new() {
 		builtinReplTypes = refl.getSubTypesOf(ICommandLineHandler)
-			.filter[constructors.length == 1 && constructors.get(0).parameterCount == 0]
+			.filter[
+				!Modifier.isAbstract(modifiers)
+				&& constructors.length == 1
+				&& constructors.get(0).parameterCount == 0
+			]
 			.toMap[name]
 
-		builtinReplTypeNames = builtinReplTypes.keySet.toList
+		builtinReplTypeNames = builtinReplTypes.keySet.toList.sort
 	}
 
 	def removeDynamicRepl(String name) {
