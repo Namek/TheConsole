@@ -9,6 +9,8 @@ import javax.script.ScriptException
 class ModuleRepl implements ICommandLineHandler {
 	val Module  module
 	val IConsoleContext context
+	var ICommandLineUtils utils
+
 
 	new(Module module, IConsoleContext context) {
 		this.module = module
@@ -16,6 +18,8 @@ class ModuleRepl implements ICommandLineHandler {
 	}
 
 	override init(IConsoleContext context, ICommandLineUtils utils) {
+		this.utils = utils
+
 		try {
 			context.jsEnv.tempArgs.args = #[context, utils]
 
@@ -49,15 +53,20 @@ class ModuleRepl implements ICommandLineHandler {
 
 	override handleCompletion() {
 		try {
+			context.jsEnv.tempArgs.args = #[utils.getInput()]
+
 			context.jsEnv.evalInScope('''
 				var clh = «module.variableName».commandLineHandler;
 				var fn = clh.handleCompletion;
 				if (fn) {
-					return fn.apply(clh)
+					return fn.apply(clh, TemporaryArgs.args)
 				}
 			''')
 		}
 		catch (Exception exc) { }
+		finally {
+			context.jsEnv.tempArgs.args = null
+		}
 	}
 
 	override handleExecution(String input, ICommandLineUtils utils, IConsoleContext context) {
