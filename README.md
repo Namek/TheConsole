@@ -21,7 +21,7 @@ JavaScript-able shell. Made on top of Java 8 and JavaFX.
 
 ### Links
 
-* [blogposts on NamekDev about development of this project](www.namekdev.net/topics/dailies/the-console/)
+* [blogposts on NamekDev about development of this project](https://www.namekdev.net/topics/dailies/the-console/)
 * [Trello - project planning](https://trello.com/b/4Ez5pAx7/the-console-2)
 * [The Console - Proof of Concept](https://github.com/Namek/TheConsole_POC)
 * [Scripting Documentation / Wiki](https://github.com/Namek/TheConsole/wiki)
