@@ -11,8 +11,8 @@ import javafx.scene.input.KeyEvent
 import javafx.scene.input.KeyCode
 
 class RenamableTab extends Tab {
-	private val Label label
-	private val TextField textField
+	private Label label
+	private TextField textField
 
 	new() {
 		label = new Label("Default")

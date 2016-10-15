@@ -16,7 +16,7 @@ import javafx.scene.control.TextField
  * {@link http://stackoverflow.com/questions/14965318/javafx-method-selectall-just-works-by-focus-with-keyboard}
  */
 class TextFieldCaretWatcher {
-	val TextField field
+	var TextField field
 	var IndexRange oldSelection
 	var int oldCaretPos
 
