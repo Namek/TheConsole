@@ -25,9 +25,9 @@ import net.namekdev.theconsole.view.api.IConsolePromptInput
 import net.namekdev.theconsole.view.api.IWindowController
 import rx.Subscription
 import net.namekdev.theconsole.commands.CommandCollection
-import net.namekdev.theconsole.commands.AliasCollection
 import net.namekdev.theconsole.commands.internal.AliasCommand
 import net.namekdev.theconsole.commands.internal.ExecCommand
+import net.namekdev.theconsole.commands.AliasStorage
 
 class AppStateManager implements IConsoleContextManager {
 	JsFilesManager jsFilesManager
@@ -60,19 +60,10 @@ class AppStateManager implements IConsoleContextManager {
 
 		replManager = new ReplManager()
 
-
-		val aliases = new AliasCollection
-		val aliasStorage = database.aliasesSection
-		val root = aliasStorage.root
-
-		if (root.size > 0) {
-			root.asObject.forEach([node |
-				aliases.put(node.name, node.value.asString())
-			])
-		}
+		val aliases = new AliasStorage(database.aliasesSection)
 
 		commands = new CommandCollection(aliases)
-		commands.put("alias", new AliasCommand(aliases, aliasStorage))
+		commands.put("alias", new AliasCommand(aliases))
 		commands.put("exec", new ExecCommand())
 
 		moduleManager = new ModuleManager(database, commands, replManager, this)

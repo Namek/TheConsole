@@ -14,7 +14,7 @@ import net.namekdev.theconsole.view.api.IConsolePromptInput
 
 class CommandLineHandler implements ICommandLineHandler {
 	val CommandCollection commands
-	val AliasCollection aliases
+	val AliasStorage aliases
 
 	var IConsoleContext consoleContext
 	var IConsolePromptInput consolePrompt

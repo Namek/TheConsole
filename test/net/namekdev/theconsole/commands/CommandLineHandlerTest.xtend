@@ -1,36 +1,32 @@
 package net.namekdev.theconsole.commands
 
 import net.namekdev.theconsole.commands.api.ICommandLineUtils
+import net.namekdev.theconsole.commands.internal.AliasCommand
+import net.namekdev.theconsole.commands.internal.AliasCommandTest
 import net.namekdev.theconsole.state.api.IConsoleContext
 import net.namekdev.theconsole.view.api.IConsoleOutput
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.powermock.modules.junit4.PowerMockRunner
 import org.mockito.Mock
+import org.powermock.modules.junit4.PowerMockRunner
 
 import static org.mockito.Matchers.*
 import static org.mockito.Mockito.times
 import static org.mockito.Mockito.verify
 import static org.powermock.api.mockito.PowerMockito.*
+
 import static extension org.junit.Assert.*
-import net.namekdev.theconsole.commands.internal.AliasCommand
 
 @RunWith(PowerMockRunner)
 class CommandLineHandlerTest {
 	CommandLineHandler commandLineHandler
 	CommandCollection commands
-	AliasCollection aliases
+	AliasStorage aliases
 
-	@Mock
-	IConsoleContext consoleContext
-
-	@Mock
-	ICommandLineUtils commandLineUtils
-
-	@Mock
-	IConsoleOutput consoleOutput
+	@Mock IConsoleContext consoleContext
+	@Mock ICommandLineUtils commandLineUtils
+	@Mock IConsoleOutput consoleOutput
 
 
 	@Before
@@ -38,7 +34,7 @@ class CommandLineHandlerTest {
 		when(consoleContext.getOutput).thenReturn(consoleOutput)
 
 		commandLineHandler = null
-		aliases = new AliasCollection
+		aliases = spy(new AliasStorage(new AliasStorageMock))
 		commands = new CommandCollection(aliases)
 		commandLineHandler = new CommandLineHandler(commands)
 		commandLineHandler.init(consoleContext, commandLineUtils)
@@ -54,6 +50,12 @@ class CommandLineHandlerTest {
 		fail()
 	}
 
+	/**
+	 * This tests only {@link CommandLineHandler}.
+	 * Full test of aliasing should be a unit test made for {@link AliasCommand}.
+	 *
+	 * @see AliasCommandTest
+	 */
 	@Test
 	def void aliasCommands() {
 		// install alias command
@@ -71,17 +73,17 @@ class CommandLineHandlerTest {
 		verify(consoleOutput, times(1)).addInputEntry(anyString())
 		verify(consoleContext, times(1)).runUnscopedJs('wiki')
 
-
 		// create alias
+		when(aliasCommand.run(eq(consoleContext), any())).thenReturn(null)
 		commandLineHandler.handleExecution('alias wiki wikipedia', commandLineUtils, consoleContext)
 
-		1.assertEquals(aliases.aliasCount)
-		'wikipedia'.assertEquals(aliases.get('wiki'))
-
+		verify(aliasCommand, times(1)).run(eq(consoleContext), any())
 
 		// use alias
-//		commandLineHandler.handleExecution('wiki', commandLineUtils, consoleContext)
-//		verify(aliasCommand, times(1)).run(consoleContext, any())
+		when(aliases.get('wiki')).thenReturn('wikipedia')
+		commandLineHandler.handleExecution('wiki', commandLineUtils, consoleContext)
+
+		verify(aliasCommand, times(1)).run(eq(consoleContext), any())
 	}
 
 	@Test

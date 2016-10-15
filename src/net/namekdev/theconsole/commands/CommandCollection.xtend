@@ -12,10 +12,10 @@ import net.namekdev.theconsole.commands.api.ICommand
 class CommandCollection {
 	val Map<String, ICommand> commands = new TreeMap
 	val List<String> commandNames = new ArrayList
-	public val AliasCollection aliases
+	public val AliasStorage aliases
 
 
-	new(AliasCollection aliases) {
+	new(AliasStorage aliases) {
 		this.aliases = aliases
 	}
 
