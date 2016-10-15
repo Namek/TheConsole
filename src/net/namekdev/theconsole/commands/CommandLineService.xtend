@@ -22,7 +22,7 @@ class CommandLineService implements ICommandLineService, ICommandLineUtils, Even
 	val SPACE_CHAR = 32 as char
 
 
-	new(IConsoleContext consoleContext, CommandManager commandManager) {
+	new(IConsoleContext consoleContext, CommandCollection commandManager) {
 		this.consoleContext = consoleContext
 		consoleContext.input.keyPressHandler = this
 

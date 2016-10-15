@@ -13,8 +13,8 @@ import net.namekdev.theconsole.view.api.IConsoleOutput
 import net.namekdev.theconsole.view.api.IConsolePromptInput
 
 class CommandLineHandler implements ICommandLineHandler {
-	val CommandManager commandManager
-	val AliasManager aliasManager
+	val CommandCollection commands
+	val AliasCollection aliases
 
 	var IConsoleContext consoleContext
 	var IConsolePromptInput consolePrompt
@@ -34,9 +34,9 @@ class CommandLineHandler implements ICommandLineHandler {
 
 	val commandNames = new ArrayList<String>()
 
-	new(CommandManager commandManager) {
-		this.commandManager = commandManager
-		this.aliasManager = commandManager.aliases
+	new(CommandCollection commandManager) {
+		this.commands = commandManager
+		this.aliases = commandManager.aliases
 	}
 
 	override init(IConsoleContext context, ICommandLineUtils utils) {
@@ -94,9 +94,9 @@ class CommandLineHandler implements ICommandLineHandler {
 
 		// search between true commands and command aliases
 		commandNames.clear()
-		commandNames.ensureCapacity(commandManager.commandCount + aliasManager.aliasCount)
-		commandManager.findCommandNamesStartingWith(namePart, commandNames)
-		aliasManager.findAliasesStartingWith(namePart, commandNames)
+		commandNames.ensureCapacity(commands.commandCount + aliases.aliasCount)
+		commands.findCommandNamesStartingWith(namePart, commandNames)
+		aliases.findAliasesStartingWith(namePart, commandNames)
 
 		// Complete this command
 		if (commandNames.size == 1) {
@@ -135,8 +135,8 @@ class CommandLineHandler implements ICommandLineHandler {
 
 		// Just present command list
 		else {
-			val allScriptNames = commandManager.getAllScriptNames()
-			val allAliasNames = aliasManager.getAllAliasNames()
+			val allScriptNames = commands.getAllScriptNames()
+			val allAliasNames = aliases.getAllAliasNames()
 			commandNames.clear()
 			commandNames.addAll(allScriptNames)
 			commandNames.addAll(allAliasNames)
@@ -171,7 +171,7 @@ class CommandLineHandler implements ICommandLineHandler {
 		// first token is supposed to be a command name but don't have to be
 		matcher.find()
 		val commandName = matcher.group
-		val command = commandManager.get(commandName)
+		val command = commands.get(commandName)
 		val isCommand = command != null
 
 		if (!isCommand) {
@@ -313,7 +313,7 @@ class CommandLineHandler implements ICommandLineHandler {
 			}
 
 			// Look for command of such name
-			var command = commandManager.get(commandName) as ICommand
+			var command = commands.get(commandName) as ICommand
 
 			if (command != null) {
 				// TODO validate arguments here
@@ -343,7 +343,7 @@ class CommandLineHandler implements ICommandLineHandler {
 			}
 			else if (!ignoreAliases) {
 				// There is no script named by `commandName` so look for aliases
-				val commandStr = aliasManager.get(commandName)
+				val commandStr = aliases.get(commandName)
 
 				if (commandStr != null) {
 					val newFullCommand = commandStr + fullCommand.substring(commandNameEndIndex)

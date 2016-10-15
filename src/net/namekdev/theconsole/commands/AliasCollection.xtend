@@ -4,25 +4,17 @@ import java.util.ArrayList
 import java.util.List
 import java.util.Map
 import java.util.TreeMap
-import net.namekdev.theconsole.utils.api.IDatabase.ISectionAccessor
 
-class AliasManager {
+class AliasCollection {
 	private var Map<String, String> aliases = new TreeMap<String, String>()
 	private var ArrayList<String> aliasNames = new ArrayList<String>()
 
 
-	new(ISectionAccessor aliasStorage) {
-		val root = aliasStorage.root
+	new() {
+	}
 
-		if (root.size == 0) {
-			// probably empty
-			return
-		}
-
-		val aliases = root.asObject
-		aliases.forEach([node |
-			put(node.name, node.value.asString())
-		])
+	new(Map<String, String> aliases) {
+		this.aliases.putAll(aliases)
 	}
 
 	def get(String aliasName) {

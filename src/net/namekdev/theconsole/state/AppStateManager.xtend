@@ -6,7 +6,6 @@ import java.util.ArrayList
 import java.util.List
 import javafx.application.Platform
 import net.namekdev.theconsole.commands.CommandLineService
-import net.namekdev.theconsole.commands.CommandManager
 import net.namekdev.theconsole.commands.internal.ReplCommand
 import net.namekdev.theconsole.events.Events
 import net.namekdev.theconsole.events.ResetCommandLineHandlerEvent
@@ -25,10 +24,14 @@ import net.namekdev.theconsole.view.api.IConsoleOutput
 import net.namekdev.theconsole.view.api.IConsolePromptInput
 import net.namekdev.theconsole.view.api.IWindowController
 import rx.Subscription
+import net.namekdev.theconsole.commands.CommandCollection
+import net.namekdev.theconsole.commands.AliasCollection
+import net.namekdev.theconsole.commands.internal.AliasCommand
+import net.namekdev.theconsole.commands.internal.ExecCommand
 
 class AppStateManager implements IConsoleContextManager {
 	JsFilesManager jsFilesManager
-	CommandManager commandManager
+	CommandCollection commands
 	IDatabase database
 	ReplManager replManager
 	ModuleManager moduleManager
@@ -56,12 +59,27 @@ class AppStateManager implements IConsoleContextManager {
 		}
 
 		replManager = new ReplManager()
-		commandManager = new CommandManager(database)
-		moduleManager = new ModuleManager(database, commandManager, replManager, this)
-		jsFilesManager = new JsFilesManager(database, this, commandManager, moduleManager)
+
+
+		val aliases = new AliasCollection
+		val aliasStorage = database.aliasesSection
+		val root = aliasStorage.root
+
+		if (root.size > 0) {
+			root.asObject.forEach([node |
+				aliases.put(node.name, node.value.asString())
+			])
+		}
+
+		commands = new CommandCollection(aliases)
+		commands.put("alias", new AliasCommand(aliases, aliasStorage))
+		commands.put("exec", new ExecCommand())
+
+		moduleManager = new ModuleManager(database, commands, replManager, this)
+		jsFilesManager = new JsFilesManager(database, this, commands, moduleManager)
 		jsFilesManager.init()
 
-		commandManager.put("repl", new ReplCommand(replManager))
+		commands.put("repl", new ReplCommand(replManager))
 	}
 
 	@Subscribe()
@@ -81,7 +99,7 @@ class AppStateManager implements IConsoleContextManager {
 
 	override createContext(IConsolePromptInput input, IConsoleOutput output) {
 		val newContext = new ConsoleContext(windowController, input, output)
-		val commandLineService = new CommandLineService(newContext, commandManager)
+		val commandLineService = new CommandLineService(newContext, commands)
 
 		newContext.commandLineService = commandLineService
 

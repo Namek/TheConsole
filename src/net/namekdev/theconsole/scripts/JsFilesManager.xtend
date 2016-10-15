@@ -15,7 +15,6 @@ import java.util.List
 import java.util.Map
 import java.util.Queue
 import java.util.TreeMap
-import net.namekdev.theconsole.commands.CommandManager
 import net.namekdev.theconsole.commands.internal.ScriptCommand
 import net.namekdev.theconsole.modules.ModuleManager
 import net.namekdev.theconsole.state.api.IConsoleContextProvider
@@ -30,6 +29,7 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY
 import java.util.regex.Pattern
 import java.util.Scanner
+import net.namekdev.theconsole.commands.CommandCollection
 
 class JsFilesManager {
 	final String SCRIPT_FILE_EXTENSION = "js"
@@ -37,7 +37,7 @@ class JsFilesManager {
 	IDatabase settingsDatabase
 	IDatabase.ISectionAccessor scriptsDatabase
 	IConsoleContextProvider consoleContextProvider
-	CommandManager commandManager
+	CommandCollection commandManager
 	ModuleManager moduleManager
 
 	final Path scriptsWatchDir = PathUtils.scriptsDir
@@ -52,7 +52,7 @@ class JsFilesManager {
 
 
 
-	new(IDatabase database, IConsoleContextProvider consoleContextProvider, CommandManager commandManager, ModuleManager moduleManager) {
+	new(IDatabase database, IConsoleContextProvider consoleContextProvider, CommandCollection commandManager, ModuleManager moduleManager) {
 		this.settingsDatabase = database
 		this.scriptsDatabase = settingsDatabase.getScriptsSection()
 		this.consoleContextProvider = consoleContextProvider

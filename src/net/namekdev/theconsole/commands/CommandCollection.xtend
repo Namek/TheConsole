@@ -5,25 +5,18 @@ import java.util.List
 import java.util.Map
 import java.util.TreeMap
 import net.namekdev.theconsole.commands.api.ICommand
-import net.namekdev.theconsole.commands.internal.AliasCommand
-import net.namekdev.theconsole.commands.internal.ExecCommand
-import net.namekdev.theconsole.utils.api.IDatabase
-import net.namekdev.theconsole.commands.internal.ReplCommand
 
 /**
  * Handles all commands and command aliasing.
  */
-class CommandManager {
+class CommandCollection {
 	val Map<String, ICommand> commands = new TreeMap
 	val List<String> commandNames = new ArrayList
-	public val AliasManager aliases
+	public val AliasCollection aliases
 
 
-	new(IDatabase storage) {
-		val aliasStorage = storage.aliasesSection
-		aliases = new AliasManager(aliasStorage)
-		put("alias", new AliasCommand(aliases, aliasStorage))
-		put("exec", new ExecCommand())
+	new(AliasCollection aliases) {
+		this.aliases = aliases
 	}
 
 	def get(String name) {

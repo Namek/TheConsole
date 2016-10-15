@@ -2,13 +2,13 @@ package net.namekdev.theconsole.commands.internal
 
 import com.eclipsesource.json.Json
 import java.util.ArrayList
-import net.namekdev.theconsole.commands.AliasManager
 import net.namekdev.theconsole.commands.api.ICommand
 import net.namekdev.theconsole.state.api.IConsoleContext
 import net.namekdev.theconsole.utils.api.IDatabase.ISectionAccessor
+import net.namekdev.theconsole.commands.AliasCollection
 
 class AliasCommand implements ICommand {
-	protected AliasManager aliasManager
+	protected AliasCollection aliases
 	protected ISectionAccessor storage
 
 	private ArrayList<String> tmpArray = new ArrayList<String>()
@@ -19,8 +19,8 @@ class AliasCommand implements ICommand {
  - alias <alias> <command> [param, [param, [...]]]'
 
 
-	new(AliasManager aliasManager, ISectionAccessor storage) {
-		this.aliasManager = aliasManager
+	new(AliasCollection aliases, ISectionAccessor storage) {
+		this.aliases = aliases
 		this.storage = storage
 	}
 
@@ -76,7 +76,7 @@ class AliasCommand implements ICommand {
 			val aliasValue = utils.argsToString(args, 1)
 
 			aliases.set(aliasName, aliasValue)
-			aliasManager.put(aliasName, aliasValue)
+			this.aliases.put(aliasName, aliasValue)
 		}
 
 		if (shouldSave) {

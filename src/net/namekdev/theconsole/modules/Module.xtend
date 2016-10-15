@@ -4,12 +4,12 @@ import java.nio.file.Path
 import java.util.ArrayList
 import java.util.List
 import jdk.nashorn.api.scripting.ScriptObjectMirror
-import net.namekdev.theconsole.commands.CommandManager
 import net.namekdev.theconsole.commands.internal.ModuleCommand
 import net.namekdev.theconsole.repl.ReplManager
 import net.namekdev.theconsole.repl.instantiator.ModuleReplInstantiator
 import net.namekdev.theconsole.utils.PathUtils
 import net.namekdev.theconsole.utils.api.IDatabase.ISectionAccessor
+import net.namekdev.theconsole.commands.CommandCollection
 
 class Module {
 	public val String name
@@ -34,7 +34,7 @@ class Module {
 		this.context = new ModuleContext(this)
 	}
 
-	def void refreshCommands(CommandManager commandManager, List<String> commands) {
+	def void refreshCommands(CommandCollection commandManager, List<String> commands) {
 		val toUnregister = registeredCommands.filter[cmd | !commands.contains(cmd)].toList
 		val toRegister = commands.filter([cmd | !registeredCommands.contains(cmd)]).toList
 

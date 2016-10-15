@@ -8,7 +8,6 @@ import java.nio.file.Paths
 import java.util.Map
 import java.util.TreeMap
 import jdk.nashorn.api.scripting.ScriptObjectMirror
-import net.namekdev.theconsole.commands.CommandManager
 import net.namekdev.theconsole.repl.ReplManager
 import net.namekdev.theconsole.scripts.execution.JavaScriptEnvironment
 import net.namekdev.theconsole.scripts.execution.ScriptAssertError
@@ -17,6 +16,7 @@ import net.namekdev.theconsole.state.api.IConsoleContext
 import net.namekdev.theconsole.state.api.IConsoleContextProvider
 import net.namekdev.theconsole.utils.PathUtils
 import net.namekdev.theconsole.utils.api.IDatabase
+import net.namekdev.theconsole.commands.CommandCollection
 
 /**
  * Registers commands.
@@ -31,7 +31,7 @@ class ModuleManager {
 
 	val IDatabase settings
 	val Map<String, Module> loadedModules = new TreeMap
-	val CommandManager commandManager
+	val CommandCollection commandManager
 	val ReplManager replManager
 	val tmpJsEnv = new JavaScriptEnvironment()
 
@@ -44,7 +44,7 @@ class ModuleManager {
 	}
 
 
-	new(IDatabase settings, CommandManager commands, ReplManager repls, IConsoleContextProvider consoleContextProvider) {
+	new(IDatabase settings, CommandCollection commands, ReplManager repls, IConsoleContextProvider consoleContextProvider) {
 		this.settings = settings
 		this.commandManager = commands
 		this.replManager = repls
